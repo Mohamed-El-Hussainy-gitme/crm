@@ -17,6 +17,8 @@ export default {
           warning: "#D97706",
           danger: "#DC2626",
           surface: "#EDEADE",
+          surface50: "#FAF8F1",
+          surface100: "#F5F1E7",
           text: "#111827",
           panel: "#FFFFFF",
           border: "#D5D0C3",

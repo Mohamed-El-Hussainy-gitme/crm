@@ -1,3 +1,5 @@
+@import url("https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Ubuntu:ital,wght@0,300;0,400;0,500;0,700;1,400&family=Ubuntu+Mono:wght@400;700&display=swap");
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -5,30 +7,34 @@
 :root {
   color-scheme: light;
   --crm-primary: #072c2c;
-  --crm-primary-muted: #123e3e;
-  --crm-primary-soft: #dbe8e3;
+  --crm-primary-900: #031c1c;
+  --crm-primary-800: #0a3434;
+  --crm-primary-700: #123e3e;
   --crm-secondary: #ff5f03;
-  --crm-secondary-soft: #fff0e8;
+  --crm-secondary-700: #c94a00;
+  --crm-secondary-50: #fff2ea;
   --crm-success: #16a34a;
-  --crm-success-soft: #e8f7ee;
+  --crm-success-50: #ecfdf3;
   --crm-warning: #d97706;
-  --crm-warning-soft: #fff7ed;
+  --crm-warning-50: #fff7ed;
   --crm-danger: #dc2626;
-  --crm-danger-soft: #fef2f2;
+  --crm-danger-50: #fff1f2;
   --crm-surface: #edeade;
-  --crm-surface-strong: #e2ddcf;
+  --crm-surface-50: #faf8f1;
+  --crm-surface-100: #f5f1e7;
+  --crm-surface-200: #e6dfcf;
   --crm-panel: #ffffff;
-  --crm-border: #d5d0c3;
-  --crm-border-strong: #b9b19f;
   --crm-text: #111827;
   --crm-muted: #4b5563;
-  --crm-muted-soft: #6b7280;
+  --crm-muted-2: #6b7280;
+  --crm-border: #d8d1c2;
+  --crm-border-strong: #b6ab97;
   --crm-focus: #ff5f03;
-  --crm-radius-sm: 0.625rem;
-  --crm-radius-md: 0.875rem;
+  --crm-radius-sm: 0.5rem;
+  --crm-radius-md: 0.75rem;
   --crm-radius-lg: 1rem;
-  --crm-shadow-panel: 0 10px 30px rgba(17, 24, 39, 0.08);
-  --crm-shadow-shell: 0 18px 60px rgba(7, 44, 44, 0.1);
+  --crm-shadow-panel: 0 1px 2px rgba(17, 24, 39, 0.06), 0 14px 34px rgba(7, 44, 44, 0.08);
+  --crm-shadow-popover: 0 24px 70px rgba(7, 44, 44, 0.18);
 }
 
 html,
@@ -39,10 +45,11 @@ body {
 body {
   @apply antialiased;
   background:
-    radial-gradient(circle at top left, rgba(255, 95, 3, 0.10), transparent 32rem),
-    linear-gradient(180deg, #f7f4ec 0%, var(--crm-surface) 100%);
+    linear-gradient(180deg, rgba(255, 95, 3, 0.06), transparent 16rem),
+    linear-gradient(135deg, var(--crm-surface-50) 0%, var(--crm-surface) 100%);
   color: var(--crm-text);
   font-family: Ubuntu, Inter, "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  font-size: 15px;
 }
 
 html[lang="ar"] body {
@@ -68,6 +75,7 @@ a {
 
 h1,
 h2,
+h3,
 .font-display {
   font-family: Oswald, Ubuntu, Inter, "Segoe UI", sans-serif;
   letter-spacing: -0.015em;
@@ -87,6 +95,13 @@ textarea {
   text-align: start;
 }
 
+button,
+input,
+select,
+textarea {
+  min-height: 2.5rem;
+}
+
 input:focus,
 select:focus,
 textarea:focus,
@@ -94,14 +109,7 @@ button:focus-visible,
 a:focus-visible {
   outline: 2px solid var(--crm-focus);
   outline-offset: 2px;
-  box-shadow: 0 0 0 4px rgba(255, 95, 3, 0.18);
-}
-
-button,
-input,
-select,
-textarea {
-  min-height: 2.75rem;
+  box-shadow: 0 0 0 4px rgba(255, 95, 3, 0.16);
 }
 
 .force-ltr {
@@ -109,9 +117,36 @@ textarea {
   text-align: left;
 }
 
+.crm-shell-grid {
+  background-image:
+    linear-gradient(rgba(7, 44, 44, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(7, 44, 44, 0.035) 1px, transparent 1px);
+  background-size: 32px 32px;
+}
+
+.enterprise-grid-bg {
+  background:
+    radial-gradient(circle at 10% 0%, rgba(255, 95, 3, 0.10), transparent 24rem),
+    radial-gradient(circle at 90% 0%, rgba(7, 44, 44, 0.08), transparent 24rem),
+    linear-gradient(135deg, #faf8f1 0%, #edeade 100%);
+}
+
 .crm-table th,
 .crm-table td {
   text-align: start;
+}
+
+.crm-table tbody tr {
+  transition: background-color 160ms ease, box-shadow 160ms ease;
+}
+
+.crm-table tbody tr:hover {
+  background: rgba(237, 234, 222, 0.55);
+}
+
+.shell-sidebar {
+  background:
+    linear-gradient(180deg, var(--crm-primary-900) 0%, var(--crm-primary) 58%, var(--crm-primary-800) 100%);
 }
 
 html[dir="rtl"] .shell-sidebar {
@@ -128,36 +163,29 @@ html[dir="rtl"] .drawer-root {
   justify-content: flex-start;
 }
 
-.enterprise-grid-bg {
-  background-image:
-    linear-gradient(rgba(7, 44, 44, 0.05) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(7, 44, 44, 0.05) 1px, transparent 1px);
-  background-size: 28px 28px;
-}
-
-/* Enterprise token bridge for existing Tailwind-heavy pages. */
-.bg-slate-50 { background-color: #f7f4ec !important; }
-.bg-slate-100 { background-color: var(--crm-surface) !important; }
-.bg-slate-200 { background-color: var(--crm-surface-strong) !important; }
+/* Token bridge for legacy Tailwind-heavy pages. Keep it conservative and deterministic. */
+.bg-slate-50 { background-color: var(--crm-surface-50) !important; }
+.bg-slate-100 { background-color: var(--crm-surface-100) !important; }
+.bg-slate-200 { background-color: var(--crm-surface-200) !important; }
 .bg-white { background-color: var(--crm-panel) !important; }
-.bg-sky-50 { background-color: var(--crm-primary-soft) !important; }
-.bg-sky-600,
-.hover\:bg-sky-600:hover { background-color: var(--crm-primary) !important; }
-.hover\:bg-sky-700:hover,
-.bg-sky-700 { background-color: var(--crm-primary-muted) !important; }
-.bg-emerald-50 { background-color: var(--crm-success-soft) !important; }
-.bg-emerald-600,
-.hover\:bg-emerald-700:hover { background-color: var(--crm-success) !important; }
-.bg-amber-50 { background-color: var(--crm-warning-soft) !important; }
-.bg-rose-50 { background-color: var(--crm-danger-soft) !important; }
-.bg-rose-600,
-.hover\:bg-rose-700:hover { background-color: var(--crm-danger) !important; }
+.bg-white\/90,
+.bg-white\/95 { background-color: rgba(255, 255, 255, 0.95) !important; }
+.bg-white\/5 { background-color: rgba(255, 255, 255, 0.08) !important; }
 .bg-slate-900,
 .bg-slate-950 { background-color: var(--crm-primary) !important; }
-.bg-slate-950\/40 { background-color: rgba(7, 44, 44, 0.78) !important; }
-.bg-white\/90,
-.bg-white\/95 { background-color: rgba(255, 255, 255, 0.93) !important; }
-.bg-white\/5 { background-color: rgba(255, 255, 255, 0.08) !important; }
+.bg-slate-950\/40 { background-color: rgba(7, 44, 44, 0.76) !important; }
+.bg-sky-50 { background-color: rgba(7, 44, 44, 0.08) !important; }
+.bg-sky-600,
+.hover\:bg-sky-600:hover,
+.hover\:bg-sky-700:hover,
+.bg-sky-700 { background-color: var(--crm-primary) !important; }
+.bg-emerald-50 { background-color: var(--crm-success-50) !important; }
+.bg-emerald-600,
+.hover\:bg-emerald-700:hover { background-color: var(--crm-success) !important; }
+.bg-amber-50 { background-color: var(--crm-warning-50) !important; }
+.bg-rose-50 { background-color: var(--crm-danger-50) !important; }
+.bg-rose-600,
+.hover\:bg-rose-700:hover { background-color: var(--crm-danger) !important; }
 
 .text-sky-300 { color: #ffd0b8 !important; }
 .text-sky-600,
@@ -166,11 +194,14 @@ html[dir="rtl"] .drawer-root {
 .text-slate-800 { color: #1f2937 !important; }
 .text-slate-700 { color: #374151 !important; }
 .text-slate-600 { color: var(--crm-muted) !important; }
-.text-slate-500 { color: var(--crm-muted-soft) !important; }
+.text-slate-500 { color: var(--crm-muted-2) !important; }
 .text-slate-400 { color: #7c7467 !important; }
-.text-emerald-700 { color: #0f7a37 !important; }
-.text-amber-700 { color: var(--crm-warning) !important; }
+.text-emerald-700,
+.text-emerald-900 { color: #0f7a37 !important; }
+.text-amber-700,
+.text-amber-900 { color: var(--crm-warning) !important; }
 .text-rose-700,
+.text-rose-900,
 .text-rose-400,
 .text-rose-300 { color: var(--crm-danger) !important; }
 .text-white { color: #ffffff !important; }
@@ -181,22 +212,21 @@ html[dir="rtl"] .drawer-root {
 .border-slate-700,
 .border-slate-800 { border-color: rgba(255, 255, 255, 0.18) !important; }
 .border-sky-200,
-.border-sky-600 { border-color: var(--crm-primary) !important; }
+.border-sky-600 { border-color: rgba(7, 44, 44, 0.28) !important; }
 .border-emerald-200 { border-color: rgba(22, 163, 74, 0.32) !important; }
 .border-amber-100,
 .border-amber-200 { border-color: rgba(217, 119, 6, 0.32) !important; }
 .border-rose-200,
-.border-rose-900 { border-color: rgba(220, 38, 38, 0.36) !important; }
+.border-rose-900 { border-color: rgba(220, 38, 38, 0.34) !important; }
 
 .ring-sky-500,
 .focus\:ring-sky-500:focus,
 .focus-visible\:ring-sky-500:focus-visible { --tw-ring-color: var(--crm-focus) !important; }
-.shadow-sm { box-shadow: var(--crm-shadow-panel) !important; }
-.shadow-xl { box-shadow: var(--crm-shadow-shell) !important; }
+.shadow-sm { box-shadow: 0 1px 2px rgba(17, 24, 39, 0.06) !important; }
+.shadow-xl { box-shadow: var(--crm-shadow-popover) !important; }
 
-/* More enterprise-like geometry over the previous soft consumer rounding. */
-.rounded-\[32px\] { border-radius: 1rem !important; }
-.rounded-\[28px\] { border-radius: 1rem !important; }
-.rounded-\[24px\] { border-radius: 0.875rem !important; }
-.rounded-2xl { border-radius: 0.875rem !important; }
-.rounded-xl { border-radius: 0.75rem !important; }
+.rounded-\[32px\] { border-radius: var(--crm-radius-lg) !important; }
+.rounded-\[28px\] { border-radius: var(--crm-radius-lg) !important; }
+.rounded-\[24px\] { border-radius: var(--crm-radius-md) !important; }
+.rounded-2xl { border-radius: var(--crm-radius-md) !important; }
+.rounded-xl { border-radius: var(--crm-radius-sm) !important; }
