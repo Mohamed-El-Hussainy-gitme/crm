@@ -12,17 +12,19 @@ export async function handleFollowUpsRoute(request: Request, env: BackendEnv, pa
     return jsonResponse(await new FollowUpsService(env, user).overview(request));
   }
 
-  if (pathSegments[0] !== "contacts") return null;
+  const isFollowUpMutation =
+    pathSegments[0] === "contacts" &&
+    (
+      (pathSegments.length === 3 && pathSegments[2] === "follow-ups" && method === "POST") ||
+      (pathSegments.length === 3 && pathSegments[2] === "next-follow-up" && method === "PATCH") ||
+      (pathSegments.length === 4 && pathSegments[2] === "next-follow-up" && pathSegments[3] === "complete" && method === "POST")
+    );
+
+  if (!isFollowUpMutation) return null;
 
   const contactId = pathSegments[1];
   if (!contactId) throw new HttpError("Contact id is required", 400);
 
-  const isFollowUpMutation =
-    (pathSegments.length === 3 && pathSegments[2] === "follow-ups" && method === "POST") ||
-    (pathSegments.length === 3 && pathSegments[2] === "next-follow-up" && method === "PATCH") ||
-    (pathSegments.length === 4 && pathSegments[2] === "next-follow-up" && pathSegments[3] === "complete" && method === "POST");
-
-  if (!isFollowUpMutation) return null;
   assertTrustedOrigin(request, env);
   const user = await requireUser(request, env);
   const service = new FollowUpsService(env, user);
