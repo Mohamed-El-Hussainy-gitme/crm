@@ -29,6 +29,45 @@ export type SessionConfig = {
   secure: boolean;
 };
 
+const DISALLOWED_COOKIE_DOMAINS = new Set(["pages.dev", "workers.dev", "cloudflareworkers.com"]);
+
+function normalizeCookieDomain(value: string | undefined): string | undefined {
+  const raw = value?.trim();
+  if (!raw) return undefined;
+
+  let candidate = raw;
+
+  try {
+    candidate = new URL(raw).hostname;
+  } catch {
+    candidate = raw;
+  }
+
+  candidate = candidate.trim().replace(/^\.+/, "").replace(/\.+$/, "").toLowerCase();
+
+  if (!candidate || candidate === "localhost" || candidate.includes(":")) return undefined;
+  if (DISALLOWED_COOKIE_DOMAINS.has(candidate)) return undefined;
+
+  return candidate;
+}
+
+function resolveCookieDomain(env: BackendEnv, request: Request): string | undefined {
+  const configuredDomain = normalizeCookieDomain(env.SESSION_COOKIE_DOMAIN);
+  if (!configuredDomain) return undefined;
+
+  const hostname = new URL(request.url).hostname.toLowerCase();
+
+  if (hostname === configuredDomain) {
+    return undefined;
+  }
+
+  if (!hostname.endsWith(`.${configuredDomain}`)) {
+    return undefined;
+  }
+
+  return configuredDomain;
+}
+
 function textEncoder() {
   return new TextEncoder();
 }
@@ -125,8 +164,9 @@ export function resolveSessionConfig(env: BackendEnv, request: Request): Session
     secure: isHttpsRequest(request, env),
   };
 
-  if (env.SESSION_COOKIE_DOMAIN?.trim()) {
-    config.cookieDomain = env.SESSION_COOKIE_DOMAIN.trim();
+  const cookieDomain = resolveCookieDomain(env, request);
+  if (cookieDomain) {
+    config.cookieDomain = cookieDomain;
   }
 
   return config;
