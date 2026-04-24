@@ -57,3 +57,18 @@ npm run dev
 ## Code change applied
 
 `apps/web/next.config.ts` now limits Next.js build workers to `cpus: 1`. This avoids worker `EPIPE` failures observed during `next build` in constrained environments.
+
+## Hotfix: API base URL prefix
+
+Observed browser requests were sent to `http://127.0.0.1:4000/auth/me` and `http://127.0.0.1:4000/follow-ups/overview`, but the Fastify API mounts application routes under `/api`.
+
+Fixes applied:
+
+- Updated `apps/web/.env.local` to `NEXT_PUBLIC_API_URL=http://127.0.0.1:4000/api`.
+- Hardened `apps/web/lib/api.ts` with `resolveApiUrl()` so `NEXT_PUBLIC_API_URL=http://127.0.0.1:4000` is automatically normalized to `http://127.0.0.1:4000/api`.
+- Updated the reports CSV export to reuse the shared normalized API base instead of duplicating env parsing.
+
+Expected browser requests after restarting `npm run dev`:
+
+- `http://127.0.0.1:4000/api/auth/me`
+- `http://127.0.0.1:4000/api/follow-ups/overview`

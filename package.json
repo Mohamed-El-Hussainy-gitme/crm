@@ -28,7 +28,9 @@
     "local:reset": "npm run db:reset --workspace @smartcrm/api",
     "db:resolve:baseline": "npm run prisma:resolve:baseline --workspace @smartcrm/api",
     "db:migrate:dev": "npm run prisma:migrate --workspace @smartcrm/api",
-    "doctor": "npm run setup:env && npm run db:start && npm run db:generate && npm run db:migrate"
+    "doctor": "npm run setup:env && npm run db:start && npm run db:generate && npm run db:migrate",
+    "ci:verify": "npm run setup:env && npm run db:generate && npm run db:migrate && npm run db:seed && npm run local:verify",
+    "ci:dev-smoke": "node scripts/ci-dev-smoke.mjs"
   },
   "devDependencies": {
     "concurrently": "^9.1.2"

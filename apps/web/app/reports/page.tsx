@@ -5,10 +5,9 @@ import { AppShell } from "@/components/layout";
 import { Card, EmptyState, PageHeader, StatCard } from "@/components/cards";
 import { useI18n, useToast } from "@/components/providers";
 import { buttonStyles } from "@/components/ui";
-import { apiFetch } from "@/lib/api";
+import { API_URL, apiFetch } from "@/lib/api";
 import { useApiQuery } from "@/lib/query";
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000/api";
 
 type Report = {
   contactsByStage: Array<{ stage: string; _count: { stage: number } }>;
@@ -55,7 +54,7 @@ export default function ReportsPage() {
 
   const exportContacts = async () => {
     try {
-      const response = await fetch(`${API_BASE}/reports/contacts-export`, { credentials: "include" });
+      const response = await fetch(`${API_URL}/reports/contacts-export`, { credentials: "include" });
       const csv = await response.text();
       const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
       const url = URL.createObjectURL(blob);

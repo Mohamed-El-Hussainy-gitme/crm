@@ -1,6 +1,11 @@
 import { clearStoredSession } from "@/lib/session";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000/api";
+export function resolveApiUrl(value = process.env.NEXT_PUBLIC_API_URL): string {
+  const raw = (value || "http://localhost:4000/api").trim().replace(/\/+$/, "");
+  return raw.endsWith("/api") ? raw : `${raw}/api`;
+}
+
+export const API_URL = resolveApiUrl();
 
 export class ApiError extends Error {
   status: number;

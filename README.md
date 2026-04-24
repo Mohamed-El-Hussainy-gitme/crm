@@ -76,4 +76,3 @@ npm run clean
 
 - Generated build artifacts such as `apps/api/dist`, `packages/shared/dist`, and `apps/web/.next` are intentionally excluded from this cleaned project snapshot.
 - Rotate any local secrets before sharing this project outside your machine.
-"# crm" 
