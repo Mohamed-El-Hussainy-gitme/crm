@@ -1,9 +1,9 @@
 "use client";
 
-import { type FormEvent, useEffect, useMemo, useState } from "react";
+import { Suspense, type FormEvent, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import type { Route } from "next";
-import { useParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { AppShell } from "@/components/layout";
 import { useI18n, useToast } from "@/components/providers";
 import { Badge, Card, EmptyState, PageHeader, StatCard } from "@/components/cards";
@@ -130,7 +130,16 @@ function stageTone(stage: string) {
 }
 
 export default function ContactDetailsPage() {
-  const params = useParams<{ id: string }>();
+  return (
+    <Suspense fallback={<AppShell><p className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-600">Loading contact...</p></AppShell>}>
+      <ContactDetailsPageContent />
+    </Suspense>
+  );
+}
+
+function ContactDetailsPageContent() {
+  const searchParams = useSearchParams();
+  const contactId = searchParams.get("id") || "";
   const { notify } = useToast();
   const {
     t,
@@ -185,12 +194,12 @@ export default function ContactDetailsPage() {
   );
 
   const load = async () => {
-    if (!params?.id) return;
+    if (!contactId) return;
     try {
       setError("");
       const [details, smart] = await Promise.all([
-        apiFetch<ContactDetails>(`/contacts/${params.id}`),
-        apiFetch<Intelligence>(`/contacts/${params.id}/intelligence`).catch(() => null),
+        apiFetch<ContactDetails>(`/contacts/${contactId}`),
+        apiFetch<Intelligence>(`/contacts/${contactId}/intelligence`).catch(() => null),
       ]);
       setContact(details);
       setIntelligence(smart);
@@ -201,7 +210,7 @@ export default function ContactDetailsPage() {
 
   useEffect(() => {
     void load();
-  }, [params?.id]);
+  }, [contactId]);
 
   const pendingTasks = useMemo(() => (contact?.tasks ?? []).filter((task) => task.status === "PENDING"), [contact]);
   const overdueTasks = useMemo(() => pendingTasks.filter((task) => new Date(task.dueAt).getTime() < Date.now()), [pendingTasks]);

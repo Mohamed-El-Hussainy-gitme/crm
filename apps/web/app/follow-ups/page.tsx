@@ -149,7 +149,7 @@ export default function FollowUpsPage() {
                   extraActions={
                     <>
                       <button type="button" onClick={() => setFollowUpContact(item)} className={buttonStyles("primary", "sm")}>Schedule</button>
-                      <Link href={`/contacts/${item.contactId}` as Route} className={buttonStyles("secondary", "sm")}>Open</Link>
+                      <Link href={`/contacts/view?id=${item.contactId}` as Route} className={buttonStyles("secondary", "sm")}>Open</Link>
                     </>
                   }
                 />

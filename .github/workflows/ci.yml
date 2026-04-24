@@ -1,4 +1,4 @@
-name: CRM CI
+name: CRM Cloudflare CI
 
 on:
   push:
@@ -13,43 +13,26 @@ permissions:
   contents: read
 
 concurrency:
-  group: crm-ci-${{ github.ref }}
+  group: crm-cloudflare-ci-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
   verify:
-    name: Build, test, migrate, and smoke-test dev
+    name: Build Cloudflare fullstack package
     runs-on: ubuntu-latest
-    timeout-minutes: 25
-
-    services:
-      postgres:
-        image: postgres:16
-        env:
-          POSTGRES_USER: smartcrm
-          POSTGRES_PASSWORD: smartcrm
-          POSTGRES_DB: smartcrm
-        ports:
-          - 5432:5432
-        options: >-
-          --health-cmd "pg_isready -U smartcrm -d smartcrm"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 10
+    timeout-minutes: 20
 
     env:
       CI: true
       NEXT_TELEMETRY_DISABLED: 1
-      LOG_LEVEL: silent
-      PORT: 4000
-      DATABASE_URL: postgresql://smartcrm:smartcrm@127.0.0.1:5432/smartcrm?schema=public
-      DIRECT_URL: postgresql://smartcrm:smartcrm@127.0.0.1:5432/smartcrm?schema=public
-      JWT_SECRET: smartcrm-ci-secret-123456789
-      APP_URL: http://localhost:3000
-      CORS_ORIGINS: http://localhost:3000
-      TRUST_PROXY: false
-      SESSION_COOKIE_SECURE: false
-      NEXT_PUBLIC_API_URL: http://127.0.0.1:4000/api
+      SUPABASE_URL: https://example.supabase.co
+      SUPABASE_ANON_KEY: ci-anon-key
+      SUPABASE_SERVICE_ROLE_KEY: ci-service-role-key
+      APP_URL: http://localhost:8788
+      CORS_ORIGINS: http://localhost:8788
+      SESSION_SECRET: ci-session-secret-change-me-32-bytes-minimum
+      SESSION_COOKIE_NAME: smartcrm_session
+      SESSION_MAX_AGE_SECONDS: 43200
 
     steps:
       - name: Checkout repository
@@ -65,20 +48,5 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Prepare env files
-        run: npm run setup:env
-
-      - name: Generate Prisma client
-        run: npm run db:generate
-
-      - name: Apply database migrations
-        run: npm run db:migrate
-
-      - name: Seed database
-        run: npm run db:seed
-
-      - name: Build and run unit tests
-        run: npm run local:verify
-
-      - name: Smoke-test npm run dev
-        run: npm run ci:dev-smoke
+      - name: Build and test Cloudflare target
+        run: npm run cf:verify

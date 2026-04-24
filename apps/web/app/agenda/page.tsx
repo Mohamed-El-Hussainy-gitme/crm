@@ -140,7 +140,7 @@ function TimelineEvent({ item, compact = false }: { item: AgendaResponse["events
           <p className="mt-1 text-sm text-slate-600">{item.contactName || t("common.noContact")}</p>
           {!compact && item.amount ? <p className="mt-1 text-sm text-slate-500">{t("agenda.amount", { value: formatCurrency(item.amount) })}</p> : null}
         </div>
-        {item.contactId ? <Link href={`/contacts/${item.contactId}` as Route} className={buttonStyles("secondary", "sm")}>{t("common.open")}</Link> : null}
+        {item.contactId ? <Link href={`/contacts/view?id=${item.contactId}` as Route} className={buttonStyles("secondary", "sm")}>{t("common.open")}</Link> : null}
       </div>
     </div>
   );

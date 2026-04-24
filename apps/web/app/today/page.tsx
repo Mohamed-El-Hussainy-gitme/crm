@@ -139,7 +139,7 @@ export default function TodayPage() {
         <Card title={t("today.unscheduledTitle")} description={t("today.unscheduledDescription")}>
           <div className="space-y-3">
             {overview?.unscheduled.length ? overview.unscheduled.map((item) => (
-              <ScheduledItemRow key={item.id} item={item} extraActions={<><button type="button" onClick={() => setFollowUpContact(item)} className={buttonStyles("primary", "sm")}>{t("common.schedule")}</button><Link href={`/contacts/${item.contactId}` as Route} className={buttonStyles("secondary", "sm")}>{t("common.openContact")}</Link></>} />
+              <ScheduledItemRow key={item.id} item={item} extraActions={<><button type="button" onClick={() => setFollowUpContact(item)} className={buttonStyles("primary", "sm")}>{t("common.schedule")}</button><Link href={`/contacts/view?id=${item.contactId}` as Route} className={buttonStyles("secondary", "sm")}>{t("common.openContact")}</Link></>} />
             )) : <EmptyState title={t("today.noUnscheduled")} description={t("today.noUnscheduledDescription")} />}
           </div>
         </Card>
@@ -156,7 +156,7 @@ export default function TodayPage() {
                   <p className="mt-1 text-sm text-slate-500">{payment.label} · {formatNumber(payment.amount)} · {formatDateTime(payment.dueDate)}</p>
                 </div>
                 <div className="flex flex-wrap gap-2">
-                  <Link href={`/contacts/${payment.contactId}` as Route} className={buttonStyles("secondary", "sm")}>{t("common.openContact")}</Link>
+                  <Link href={`/contacts/view?id=${payment.contactId}` as Route} className={buttonStyles("secondary", "sm")}>{t("common.openContact")}</Link>
                   {payment.status !== "PAID" ? <button type="button" onClick={() => void markPaymentPaid(payment.id)} disabled={busyId === payment.id} className={buttonStyles("success", "sm")}>{busyId === payment.id ? t("common.saving") : t("today.markPaid")}</button> : null}
                 </div>
               </div>
@@ -184,7 +184,7 @@ function PlannerBucket({ title, description, items, busyId, onComplete, onResche
     <Card title={title} description={description}>
       <div className="space-y-3">
         {items.length ? items.map((item) => (
-          <ScheduledItemRow key={item.id} item={item} extraActions={<><button type="button" onClick={() => onReschedule(item)} disabled={busyId === item.id} className={buttonStyles("secondary", "sm")}>{t("common.reschedule")}</button><Link href={`/contacts/${item.contactId}` as Route} className={buttonStyles("ghost", "sm")}>{t("common.openContact")}</Link><button type="button" onClick={() => onComplete(item)} disabled={busyId === item.id} className={buttonStyles("primary", "sm")}>{t("common.complete")}</button></>} />
+          <ScheduledItemRow key={item.id} item={item} extraActions={<><button type="button" onClick={() => onReschedule(item)} disabled={busyId === item.id} className={buttonStyles("secondary", "sm")}>{t("common.reschedule")}</button><Link href={`/contacts/view?id=${item.contactId}` as Route} className={buttonStyles("ghost", "sm")}>{t("common.openContact")}</Link><button type="button" onClick={() => onComplete(item)} disabled={busyId === item.id} className={buttonStyles("primary", "sm")}>{t("common.complete")}</button></>} />
         )) : <EmptyState title={t("today.noBucketItems", { bucket: title })} description={t("today.bucketClear")} />}
       </div>
     </Card>

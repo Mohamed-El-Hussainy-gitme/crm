@@ -47,7 +47,7 @@ export default function IntelligencePage() {
                           <p className="text-2xl font-semibold">{item.score}</p>
                         </div>
                       </div>
-                      <Link href={`/contacts/${item.id}` as Route} className="mt-3 inline-block text-sm text-sky-300">Open contact</Link>
+                      <Link href={`/contacts/view?id=${item.id}` as Route} className="mt-3 inline-block text-sm text-sky-300">Open contact</Link>
                     </div>
                   ))}
                 </div>

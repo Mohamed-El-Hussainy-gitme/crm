@@ -184,7 +184,7 @@ export default function DealsPage() {
                               <option key={value} value={value}>{value.replaceAll("_", " ")}</option>
                             ))}
                           </Select>
-                          {deal.contactId ? <Link href={`/contacts/${deal.contactId}` as Route} className={buttonStyles("secondary", "sm")}>Open contact</Link> : null}
+                          {deal.contactId ? <Link href={`/contacts/view?id=${deal.contactId}` as Route} className={buttonStyles("secondary", "sm")}>Open contact</Link> : null}
                         </div>
                       </div>
                     ))

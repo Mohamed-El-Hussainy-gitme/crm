@@ -88,11 +88,11 @@ export default function CompaniesPage() {
               companies.map((company) => (
                 <ListRow
                   key={company.id}
-                  title={<Link href={`/companies/${company.id}` as Route} className="hover:text-sky-700">{company.name}</Link>}
+                  title={<Link href={`/companies/view?id=${company.id}` as Route} className="hover:text-sky-700">{company.name}</Link>}
                   subtitle={company.industry || "No industry set"}
                   meta={`Contacts ${company._count?.contacts || 0} · Deals ${company._count?.deals || 0} · Open ${Number(company.openPipelineValue || 0).toLocaleString()}`}
                   actions={
-                    <Link href={`/companies/${company.id}` as Route} className={buttonStyles("secondary", "sm")}>
+                    <Link href={`/companies/view?id=${company.id}` as Route} className={buttonStyles("secondary", "sm")}>
                       Open account
                     </Link>
                   }

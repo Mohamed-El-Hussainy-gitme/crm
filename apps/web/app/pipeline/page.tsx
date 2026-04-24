@@ -124,7 +124,7 @@ export default function PipelinePage() {
                         </div>
                         <div className="mt-3 flex flex-wrap gap-2">
                           <button type="button" onClick={() => setFollowUpContact(contact)} className={buttonStyles("secondary", "sm")}>{t("pipeline.schedule")}</button>
-                          <Link href={`/contacts/${contact.id}` as Route} className={buttonStyles("secondary", "sm")}>{t("common.open")}</Link>
+                          <Link href={`/contacts/view?id=${contact.id}` as Route} className={buttonStyles("secondary", "sm")}>{t("common.open")}</Link>
                           <a href={contact.whatsappUrl} target="_blank" rel="noreferrer" className={buttonStyles("success", "sm")}>{t("common.whatsapp")}</a>
                         </div>
                       </div>

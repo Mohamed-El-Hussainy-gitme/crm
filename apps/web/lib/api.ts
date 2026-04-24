@@ -1,11 +1,6 @@
 import { clearStoredSession } from "@/lib/session";
 
-export function resolveApiUrl(value = process.env.NEXT_PUBLIC_API_URL): string {
-  const raw = (value || "http://localhost:4000/api").trim().replace(/\/+$/, "");
-  return raw.endsWith("/api") ? raw : `${raw}/api`;
-}
-
-export const API_URL = resolveApiUrl();
+const API_BASE_PATH = "/api";
 
 export class ApiError extends Error {
   status: number;
@@ -24,6 +19,11 @@ function handleUnauthorized() {
   clearStoredSession();
 }
 
+function normalizePath(path: string) {
+  if (!path.startsWith("/")) return `/${path}`;
+  return path;
+}
+
 async function parseResponse(response: Response) {
   const raw = await response.text();
   const contentType = response.headers.get("content-type") || "";
@@ -40,7 +40,7 @@ export async function apiFetch<T>(path: string, options: RequestInit = {}): Prom
     headers.set("Content-Type", "application/json");
   }
 
-  const response = await fetch(`${API_URL}${path}`, {
+  const response = await fetch(`${API_BASE_PATH}${normalizePath(path)}`, {
     ...options,
     headers,
     cache: "no-store",

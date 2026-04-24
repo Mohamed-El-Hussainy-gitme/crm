@@ -172,7 +172,7 @@ export default function TasksPage() {
                     {task.description ? <p className="mt-2 text-sm text-slate-600">{task.description}</p> : null}
                   </div>
                   <div className="flex flex-wrap gap-2">
-                    {task.contactId ? <Link href={`/contacts/${task.contactId}` as Route} className={buttonStyles("secondary", "sm")}>{t("common.openContact")}</Link> : null}
+                    {task.contactId ? <Link href={`/contacts/view?id=${task.contactId}` as Route} className={buttonStyles("secondary", "sm")}>{t("common.openContact")}</Link> : null}
                     {task.status === "PENDING" ? <><button type="button" onClick={() => void rescheduleTask(task.id, 1)} disabled={busyId === task.id} className={buttonStyles("secondary", "sm")}>{t("tasks.tomorrow")}</button><button type="button" onClick={() => void rescheduleTask(task.id, 7)} disabled={busyId === task.id} className={buttonStyles("ghost", "sm")}>{t("tasks.nextWeek")}</button><button type="button" onClick={() => void cancelTask(task.id)} disabled={busyId === task.id} className={buttonStyles("danger", "sm")}>{t("tasks.cancel")}</button><button type="button" onClick={() => void completeTask(task.id)} disabled={busyId === task.id} className={buttonStyles("primary", "sm")}>{busyId === task.id ? t("common.saving") : t("tasks.complete")}</button></> : null}
                   </div>
                 </div>

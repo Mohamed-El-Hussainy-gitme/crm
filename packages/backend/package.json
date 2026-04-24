@@ -1,0 +1,30 @@
+{
+  "name": "@smartcrm/backend",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "main": "dist/app.js",
+  "types": "dist/app.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/app.d.ts",
+      "default": "./dist/app.js"
+    },
+    "./app": {
+      "types": "./dist/app.d.ts",
+      "default": "./dist/app.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "lint": "tsc --noEmit -p tsconfig.json",
+    "test": "npm run build --workspace @smartcrm/shared && npm run build && node --test tests/**/*.test.mjs",
+    "clean": "node -e \"require('fs').rmSync('dist',{recursive:true,force:true})\""
+  },
+  "devDependencies": {
+    "typescript": "^5.8.3"
+  },
+  "dependencies": {
+    "@smartcrm/shared": "1.0.0"
+  }
+}

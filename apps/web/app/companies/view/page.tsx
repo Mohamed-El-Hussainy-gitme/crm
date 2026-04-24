@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import type { Route } from "next";
 import { AppShell } from "@/components/layout";
@@ -26,19 +27,34 @@ function stageTone(stage: string) {
   return "sky" as const;
 }
 
-export default function CompanyDetailsPage({ params }: { params: Promise<{ id: string }> }) {
+export default function CompanyDetailsPage() {
+  return (
+    <Suspense fallback={<AppShell><p className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-600">Loading company...</p></AppShell>}>
+      <CompanyDetailsPageContent />
+    </Suspense>
+  );
+}
+
+function CompanyDetailsPageContent() {
+  const searchParams = useSearchParams();
+  const companyId = searchParams.get("id") || "";
   const [company, setCompany] = useState<CompanyDetails | null>(null);
   const [error, setError] = useState("");
 
   useEffect(() => {
-    void params.then(async ({ id }) => {
+    if (!companyId) {
+      setError("Missing company id");
+      return;
+    }
+
+    void (async () => {
       try {
-        setCompany(await apiFetch<CompanyDetails>(`/companies/${id}`));
+        setCompany(await apiFetch<CompanyDetails>(`/companies/${companyId}`));
       } catch (e) {
         setError(e instanceof Error ? e.message : "Failed to load company");
       }
-    });
-  }, [params]);
+    })();
+  }, [companyId]);
 
   if (!company) {
     return (
@@ -85,7 +101,7 @@ export default function CompanyDetailsPage({ params }: { params: Promise<{ id: s
                     title={contact.fullName}
                     subtitle={contact.phone || "No phone"}
                     meta={contact.stage.replaceAll("_", " ")}
-                    actions={<Link href={`/contacts/${contact.id}` as Route} className={buttonStyles("secondary", "sm")}>Open contact</Link>}
+                    actions={<Link href={`/contacts/view?id=${contact.id}` as Route} className={buttonStyles("secondary", "sm")}>Open contact</Link>}
                     highlighted={stageTone(contact.stage) === "sky"}
                   />
                 ))
@@ -104,7 +120,7 @@ export default function CompanyDetailsPage({ params }: { params: Promise<{ id: s
                     title={deal.title}
                     subtitle={`${deal.stage.replaceAll("_", " ")} · ${Number(deal.amount || 0).toLocaleString()}`}
                     meta={deal.contact?.fullName ? `Contact ${deal.contact.fullName}` : undefined}
-                    actions={deal.contactId ? <Link href={`/contacts/${deal.contactId}` as Route} className={buttonStyles("secondary", "sm")}>Open contact</Link> : null}
+                    actions={deal.contactId ? <Link href={`/contacts/view?id=${deal.contactId}` as Route} className={buttonStyles("secondary", "sm")}>Open contact</Link> : null}
                   />
                 ))
               ) : (

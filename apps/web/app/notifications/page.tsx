@@ -145,7 +145,7 @@ export default function NotificationsPage() {
                   meta={formatDate(item.dueAt)}
                   actions={
                     <>
-                      {item.contactId ? <Link href={`/contacts/${item.contactId}` as Route} className={buttonStyles("secondary", "sm")}>Open contact</Link> : null}
+                      {item.contactId ? <Link href={`/contacts/view?id=${item.contactId}` as Route} className={buttonStyles("secondary", "sm")}>Open contact</Link> : null}
                       {item.broadcastId ? <Link href={"/broadcasts" as Route} className={buttonStyles("secondary", "sm")}>Open broadcast</Link> : null}
                       {item.paymentId ? <Link href={"/payments" as Route} className={buttonStyles("secondary", "sm")}>Open payments</Link> : null}
                       {item.taskId ? (

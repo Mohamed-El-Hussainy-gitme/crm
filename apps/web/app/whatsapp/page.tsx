@@ -153,7 +153,7 @@ export default function WhatsappPage() {
                 <div className="flex flex-wrap gap-3">
                   <button type="submit" disabled={sending || !activeContactId || !composer.trim()} className={buttonStyles("primary")}>{sending ? t("messages.sending") : t("messages.send")}</button>
                   {openWhatsappUrl ? <a href={openWhatsappUrl} target="_blank" rel="noreferrer" className={buttonStyles("success")}>{t("messages.openWhatsapp")}</a> : null}
-                  {activeConversation?.contactId ? <Link href={`/contacts/${activeConversation.contactId}` as Route} className={buttonStyles("secondary")}>{t("common.openContact")}</Link> : null}
+                  {activeConversation?.contactId ? <Link href={`/contacts/view?id=${activeConversation.contactId}` as Route} className={buttonStyles("secondary")}>{t("common.openContact")}</Link> : null}
                 </div>
               </form>
             </Card>

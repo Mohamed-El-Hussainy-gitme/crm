@@ -1,0 +1,2 @@
+/contacts/:id /contacts/view/?id=:id 302
+/companies/:id /companies/view/?id=:id 302

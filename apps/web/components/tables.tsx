@@ -103,7 +103,7 @@ export function ContactsTable({
                     {onEdit ? (
                       <button type="button" onClick={() => onEdit(contact)} className="rounded-xl border border-slate-200 px-3 py-2 text-xs font-medium text-slate-700 transition hover:bg-slate-50">{t("common.edit")}</button>
                     ) : null}
-                    <Link href={`/contacts/${contact.id}` as Route} className="rounded-xl border border-slate-200 px-3 py-2 text-xs font-medium text-slate-700 transition hover:bg-slate-50">{t("common.open")}</Link>
+                    <Link href={`/contacts/view?id=${contact.id}` as Route} className="rounded-xl border border-slate-200 px-3 py-2 text-xs font-medium text-slate-700 transition hover:bg-slate-50">{t("common.open")}</Link>
                   </div>
                 </td>
               </tr>
