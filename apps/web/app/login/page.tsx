@@ -6,6 +6,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { loginSchema } from "@smartcrm/shared";
 import { useI18n, useSession, useToast } from "@/components/providers";
 import { apiFetch } from "@/lib/api";
+import { clearStoredSession } from "@/lib/session";
 import { validateSchema } from "@/lib/forms";
 
 type LoginResponse = {
@@ -55,15 +56,18 @@ function LoginPageContent() {
     }
 
     try {
-      const result = await apiFetch<LoginResponse>("/auth/login", {
+      await apiFetch<LoginResponse>("/auth/login", {
         method: "POST",
         body: JSON.stringify(parsed.data),
       });
-      signIn({ user: result.user });
-      notify({ tone: "success", title: t("login.signedIn"), description: t("login.welcomeBack", { name: result.user.fullName }) });
+
+      const verifiedSession = await apiFetch<LoginResponse>("/auth/me");
+      signIn({ user: verifiedSession.user });
+      notify({ tone: "success", title: t("login.signedIn"), description: t("login.welcomeBack", { name: verifiedSession.user.fullName }) });
       const nextPath = (searchParams.get("next") || "/today") as Route;
       router.push(nextPath);
     } catch (error) {
+      clearStoredSession();
       const message = error instanceof Error ? error.message : t("login.defaultError");
       setError(message);
       notify({ tone: "error", title: t("login.signInFailed"), description: message });

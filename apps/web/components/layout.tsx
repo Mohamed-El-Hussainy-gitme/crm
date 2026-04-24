@@ -3,7 +3,7 @@
 import Link from "next/link";
 import type { Route } from "next";
 import { usePathname, useRouter } from "next/navigation";
-import { type ReactNode, useMemo, useState } from "react";
+import { type ReactNode, useEffect, useMemo, useState } from "react";
 import { Badge } from "@/components/cards";
 import { useI18n, useSession } from "@/components/providers";
 import { buttonStyles } from "@/components/ui";
@@ -44,7 +44,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
   const [mobileOpen, setMobileOpen] = useState(false);
-  const { user, can, signOut } = useSession();
+  const { user, can, signOut, isReady } = useSession();
   const { t, locale, setLocale, isRtl } = useI18n();
   const navArrow = isRtl ? "←" : "→";
 
@@ -55,6 +55,12 @@ export function AppShell({ children }: { children: ReactNode }) {
     const segment = pathname.split("/").filter(Boolean)[0] || "CRM";
     return segment.replace(/-/g, " ");
   }, [pathname, t]);
+
+  useEffect(() => {
+    if (!isReady || user) return;
+    const next = pathname && pathname !== "/login" ? `?next=${encodeURIComponent(pathname)}` : "";
+    router.replace(`/login${next}` as Route);
+  }, [isReady, pathname, router, user]);
 
   const visiblePrimary = primaryNav.filter((item) => !item.minimumRole || can(item.minimumRole));
   const visibleSecondary = secondaryNav.filter((item) => !item.minimumRole || can(item.minimumRole));

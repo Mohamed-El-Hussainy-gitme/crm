@@ -1,2 +1,6 @@
-/contacts/:id /contacts/view/?id=:id 302
-/companies/:id /companies/view/?id=:id 302
+# Intentionally empty.
+# Dynamic CRM detail routes are handled by static query pages such as:
+# /contacts/view?id=<contactId>
+# /companies/view?id=<companyId>
+# Do not add /contacts/:id redirects here; Cloudflare may match generated static
+# artifacts such as /contacts/index.txt and convert them into invalid ids.
