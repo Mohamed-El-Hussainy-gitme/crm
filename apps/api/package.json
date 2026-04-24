@@ -1,0 +1,51 @@
+{
+  "name": "@smartcrm/api",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build": "npm run prisma:generate && tsc -p tsconfig.json",
+    "start": "node dist/index.js",
+    "lint": "tsc --noEmit -p tsconfig.json",
+    "format": "prettier --write \"src/**/*.ts\" \"prisma/**/*.ts\"",
+    "test": "node --import tsx --test src/**/*.test.ts",
+    "prisma:generate": "prisma generate",
+    "prisma:seed": "tsx prisma/seed.ts",
+    "prisma:push": "prisma db push",
+    "prisma:migrate": "prisma migrate dev",
+    "prisma:deploy": "prisma migrate deploy",
+    "db:seed": "npm run prisma:generate && npm run prisma:seed",
+    "storage:backup": "node scripts/storage.mjs backup",
+    "storage:list": "node scripts/storage.mjs list",
+    "storage:restore": "node scripts/storage.mjs restore",
+    "db:reset": "prisma migrate reset --force",
+    "prisma:resolve:baseline": "prisma migrate resolve --applied 20260423193000_init_postgres"
+  },
+  "prisma": {
+    "seed": "tsx prisma/seed.ts"
+  },
+  "dependencies": {
+    "@fastify/cors": "^11.0.0",
+    "@fastify/jwt": "^9.1.0",
+    "@fastify/sensible": "^6.0.3",
+    "@fastify/swagger": "^9.5.1",
+    "@prisma/client": "6.18.0",
+    "@smartcrm/shared": "1.0.0",
+    "argon2": "^0.43.0",
+    "dotenv": "^16.4.7",
+    "fastify": "^5.3.3",
+    "fastify-plugin": "^5.0.1",
+    "node-cron": "^4.0.7",
+    "pino-pretty": "^13.0.0",
+    "zod": "^3.24.4",
+    "@fastify/cookie": "^11.0.2"
+  },
+  "devDependencies": {
+    "@types/node": "^22.15.21",
+    "prettier": "^3.5.3",
+    "prisma": "6.18.0",
+    "tsx": "^4.19.4",
+    "typescript": "^5.8.3"
+  }
+}

@@ -1,0 +1,8 @@
+-- AlterEnum
+ALTER TYPE "TaskType" ADD VALUE IF NOT EXISTS 'WHATSAPP';
+
+-- AlterTable
+ALTER TABLE "Task"
+  ADD COLUMN IF NOT EXISTS "hasExactTime" BOOLEAN NOT NULL DEFAULT false,
+  ADD COLUMN IF NOT EXISTS "durationMins" INTEGER,
+  ADD COLUMN IF NOT EXISTS "completionResult" TEXT;

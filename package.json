@@ -1,0 +1,36 @@
+{
+  "name": "smart-crm-monorepo",
+  "private": true,
+  "version": "1.0.0",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "setup:env": "node scripts/setup-local.mjs",
+    "local:bootstrap": "npm run setup:env && npm run db:start && npm run db:generate && npm run db:migrate && npm run db:seed",
+    "local:verify": "npm run build --workspace @smartcrm/shared && npm run build --workspace @smartcrm/api && npm run test --workspace @smartcrm/api && npm run test --workspace @smartcrm/web && npm run build --workspace @smartcrm/web",
+    "dev": "npm run build --workspace @smartcrm/shared && concurrently -n shared,api,web -c magenta,blue,green \"npm run dev --workspace @smartcrm/shared\" \"npm run dev --workspace @smartcrm/api\" \"npm run dev --workspace @smartcrm/web\"",
+    "build": "npm run build --workspace @smartcrm/shared && npm run build --workspace @smartcrm/api && npm run build --workspace @smartcrm/web",
+    "lint": "npm run lint --workspaces --if-present",
+    "test": "npm run test --workspaces --if-present",
+    "format": "npm run format --workspaces --if-present",
+    "db:start": "node scripts/db-start.mjs",
+    "db:stop": "docker compose stop postgres",
+    "db:generate": "npm run prisma:generate --workspace @smartcrm/api",
+    "db:migrate": "npm run prisma:deploy --workspace @smartcrm/api",
+    "db:seed": "npm run db:seed --workspace @smartcrm/api",
+    "db:backup": "npm run storage:backup --workspace @smartcrm/api",
+    "db:backups": "npm run storage:list --workspace @smartcrm/api",
+    "db:restore": "npm run storage:restore --workspace @smartcrm/api",
+    "clean": "node -e \"const fs=require('fs');['apps/api/dist','packages/shared/dist','apps/web/.next'].forEach(p=>fs.rmSync(p,{recursive:true,force:true}));\"",
+    "db:deploy": "npm run prisma:deploy --workspace @smartcrm/api",
+    "local:reset": "npm run db:reset --workspace @smartcrm/api",
+    "db:resolve:baseline": "npm run prisma:resolve:baseline --workspace @smartcrm/api",
+    "db:migrate:dev": "npm run prisma:migrate --workspace @smartcrm/api",
+    "doctor": "npm run setup:env && npm run db:start && npm run db:generate && npm run db:migrate"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  }
+}

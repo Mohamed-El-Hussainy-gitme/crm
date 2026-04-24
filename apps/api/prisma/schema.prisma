@@ -1,0 +1,346 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+enum PipelineStage {
+  LEAD
+  INTERESTED
+  POTENTIAL
+  VISIT
+  FREE_TRIAL
+  CLIENT
+  ON_HOLD
+  LOST
+}
+
+enum TaskPriority {
+  LOW
+  MEDIUM
+  HIGH
+}
+
+enum TaskType {
+  FOLLOW_UP
+  CALL
+  WHATSAPP
+  MEETING
+  PAYMENT
+  GENERAL
+}
+
+enum TaskStatus {
+  PENDING
+  COMPLETED
+  CANCELLED
+}
+
+enum PaymentStatus {
+  PENDING
+  PARTIAL
+  PAID
+  OVERDUE
+}
+
+enum BroadcastStatus {
+  DRAFT
+  QUEUED
+  PROCESSING
+  COMPLETED
+  FAILED
+}
+
+enum MessageDirection {
+  INBOUND
+  OUTBOUND
+}
+
+enum DealStage {
+  NEW
+  QUALIFIED
+  PROPOSAL
+  NEGOTIATION
+  WON
+  LOST
+  ON_HOLD
+}
+
+model User {
+  id           String    @id @default(cuid())
+  fullName     String
+  email        String    @unique
+  passwordHash String
+  role         String    @default("ADMIN")
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  contacts     Contact[]
+  tasks        Task[]
+  deals        Deal[]
+
+  @@index([role])
+  @@index([createdAt])
+}
+
+model Company {
+  id          String    @id @default(cuid())
+  name        String    @unique
+  industry    String?
+  website     String?
+  notes       String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  contacts    Contact[]
+  deals       Deal[]
+
+  @@index([industry])
+  @@index([createdAt])
+}
+
+model Contact {
+  id                String                 @id @default(cuid())
+  firstName         String
+  lastName          String?
+  fullName          String
+  phone             String                 @unique
+  normalizedPhone   String?
+  email             String?
+  source            String?
+  company           String?
+  locationText      String?
+  area              String?
+  mapUrl            String?
+  placeLabel        String?
+  companyId         String?
+  companyRecord     Company?               @relation(fields: [companyId], references: [id], onDelete: SetNull)
+  stage             PipelineStage          @default(LEAD)
+  expectedDealValue Float                  @default(0)
+  lastContactedAt   DateTime?
+  nextFollowUpAt    DateTime?
+  isWhatsappOptedIn Boolean                @default(false)
+  tags              String?
+  ownerId           String?
+  owner             User?                  @relation(fields: [ownerId], references: [id])
+  createdAt         DateTime               @default(now())
+  updatedAt         DateTime               @updatedAt
+  notes             Note[]
+  tasks             Task[]
+  calls             CallLog[]
+  payments          PaymentInstallment[]
+  conversations     WhatsappConversation[]
+  broadcasts        BroadcastAudience[]
+  activities        Activity[]
+  deals             Deal[]
+
+  @@index([ownerId])
+  @@index([stage])
+  @@index([nextFollowUpAt])
+  @@index([lastContactedAt])
+  @@index([companyId])
+  @@index([source])
+  @@index([ownerId, stage])
+  @@index([stage, nextFollowUpAt])
+}
+
+model Note {
+  id        String   @id @default(cuid())
+  contactId String
+  contact   Contact  @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  body      String
+  createdAt DateTime @default(now())
+
+  @@index([contactId, createdAt])
+}
+
+model Task {
+  id               String       @id @default(cuid())
+  contactId        String?
+  contact          Contact?     @relation(fields: [contactId], references: [id], onDelete: SetNull)
+  ownerId          String?
+  owner            User?        @relation(fields: [ownerId], references: [id], onDelete: SetNull)
+  title            String
+  description      String?
+  type             TaskType     @default(FOLLOW_UP)
+  priority         TaskPriority @default(MEDIUM)
+  status           TaskStatus   @default(PENDING)
+  dueAt            DateTime
+  hasExactTime     Boolean      @default(false)
+  durationMins     Int?
+  completionResult String?
+  completedAt      DateTime?
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @updatedAt
+
+  @@index([contactId])
+  @@index([ownerId])
+  @@index([status])
+  @@index([dueAt])
+  @@index([type])
+  @@index([status, dueAt])
+  @@index([ownerId, status, dueAt])
+  @@index([contactId, status])
+}
+
+model CallLog {
+  id           String   @id @default(cuid())
+  contactId    String
+  contact      Contact  @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  outcome      String
+  durationMins Int      @default(0)
+  summary      String
+  createdAt    DateTime @default(now())
+
+  @@index([contactId, createdAt])
+}
+
+model PaymentInstallment {
+  id        String        @id @default(cuid())
+  contactId String
+  contact   Contact       @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  label     String
+  amount    Float
+  dueDate   DateTime
+  paidAt    DateTime?
+  status    PaymentStatus @default(PENDING)
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+
+  @@index([contactId])
+  @@index([status])
+  @@index([dueDate])
+  @@index([status, dueDate])
+}
+
+model Broadcast {
+  id           String             @id @default(cuid())
+  name         String
+  description  String?
+  templateName String?
+  content      String
+  filters      Json
+  status       BroadcastStatus    @default(DRAFT)
+  scheduledAt  DateTime?
+  createdAt    DateTime           @default(now())
+  updatedAt    DateTime           @updatedAt
+  audience     BroadcastAudience[]
+
+  @@index([status])
+  @@index([scheduledAt])
+}
+
+model BroadcastAudience {
+  id           String    @id @default(cuid())
+  broadcastId  String
+  contactId    String
+  deliveryNote String?
+  sentAt       DateTime?
+  replyAt      DateTime?
+  failedAt     DateTime?
+  broadcast    Broadcast @relation(fields: [broadcastId], references: [id], onDelete: Cascade)
+  contact      Contact   @relation(fields: [contactId], references: [id], onDelete: Cascade)
+
+  @@unique([broadcastId, contactId])
+  @@index([contactId, sentAt])
+}
+
+model WhatsappConversation {
+  id        String            @id @default(cuid())
+  contactId String            @unique
+  contact   Contact           @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  messages  WhatsappMessage[]
+  createdAt DateTime          @default(now())
+  updatedAt DateTime          @updatedAt
+
+  @@index([updatedAt])
+}
+
+model WhatsappMessage {
+  id             String               @id @default(cuid())
+  conversationId String
+  conversation   WhatsappConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  direction      MessageDirection
+  content        String
+  externalId     String?
+  createdAt      DateTime             @default(now())
+
+  @@index([conversationId, createdAt])
+  @@index([externalId])
+}
+
+model Deal {
+  id              String    @id @default(cuid())
+  contactId       String
+  companyId       String?
+  contact         Contact   @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  company         Company?  @relation(fields: [companyId], references: [id], onDelete: SetNull)
+  ownerId         String?
+  owner           User?     @relation(fields: [ownerId], references: [id], onDelete: SetNull)
+  title           String
+  stage           DealStage @default(NEW)
+  amount          Float     @default(0)
+  probability     Int       @default(10)
+  expectedCloseAt DateTime?
+  notes           String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@index([contactId])
+  @@index([companyId])
+  @@index([ownerId])
+  @@index([stage])
+  @@index([expectedCloseAt])
+  @@index([ownerId, stage])
+  @@index([stage, expectedCloseAt])
+}
+
+model Activity {
+  id        String   @id @default(cuid())
+  contactId String
+  contact   Contact  @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  kind      String
+  meta      Json?
+  createdAt DateTime @default(now())
+
+  @@index([contactId, createdAt])
+  @@index([kind, createdAt])
+}
+
+model AppSetting {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  value     Json
+  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+}
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  actorId    String?
+  actorEmail String?
+  action     String
+  entityType String
+  entityId   String
+  before     Json?
+  after      Json?
+  createdAt  DateTime @default(now())
+
+  @@index([actorId, createdAt])
+  @@index([action, createdAt])
+  @@index([entityType, entityId])
+}
+
+model AutomationRun {
+  id        String   @id @default(cuid())
+  kind      String
+  status    String   @default("SUCCESS")
+  summary   String
+  meta      Json?
+  createdAt DateTime @default(now())
+
+  @@index([kind, createdAt])
+  @@index([status, createdAt])
+}
