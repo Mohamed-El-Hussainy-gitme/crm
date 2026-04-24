@@ -12,6 +12,7 @@ const dictionaries: Record<Locale, Record<string, DictionaryValue>> = {
   en: {
     nav: {
       today: "Today",
+      prospecting: "Prospecting",
       contacts: "Contacts",
       pipeline: "Pipeline",
       tasks: "Tasks",
@@ -593,6 +594,7 @@ const dictionaries: Record<Locale, Record<string, DictionaryValue>> = {
   ar: {
     nav: {
       today: "اليوم",
+      prospecting: "الترويج",
       contacts: "العملاء",
       pipeline: "الخطوات",
       tasks: "المهام",

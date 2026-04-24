@@ -2,6 +2,7 @@ import { errorResponse, HttpError } from "./common/errors.js";
 import { jsonResponse, methodNotAllowed, noContentResponse } from "./common/http.js";
 import { handleHealth } from "./health/routes.js";
 import { handleLogin, handleLogout, handleMe } from "./auth/routes.js";
+import { handleAcquisitionRoute } from "./acquisition/routes.js";
 import { handleAgendaRoute } from "./agenda/routes.js";
 import { handleAuditRoute } from "./audit/routes.js";
 import { handleAutomationsRoute } from "./automations/routes.js";
@@ -101,6 +102,7 @@ export function createBackendApp() {
 
         const pathSegments = path.split("/").filter(Boolean).map((segment) => decodeURIComponent(segment));
         const convertedHandlers = [
+          handleAcquisitionRoute,
           handleAgendaRoute,
           handleAuditRoute,
           handleAutomationsRoute,

@@ -335,6 +335,50 @@ export function parseLocationIntake(
   };
 }
 
+
+export const CAFE_CALL_OUTCOMES = [
+  "NO_ANSWER",
+  "WRONG_NUMBER",
+  "INTERESTED",
+  "NEEDS_CALLBACK",
+  "MEETING_BOOKED",
+  "REJECTED",
+  "ALREADY_HAS_SYSTEM",
+  "NEEDS_OWNER",
+] as const;
+
+export const cafeCallOutcomeSchema = z.enum(CAFE_CALL_OUTCOMES);
+
+export const parseCafeLeadsSchema = z.object({
+  input: z.string().trim().min(3).max(20000),
+  defaultArea: z.string().trim().max(120).optional(),
+  defaultSource: z.string().trim().max(100).optional().default("Google Maps"),
+});
+
+export const cafeLeadCandidateSchema = z.object({
+  name: z.string().trim().min(2).max(160),
+  phone: z.string().trim().max(30).optional(),
+  area: z.string().trim().max(120).optional(),
+  address: z.string().trim().max(500).optional(),
+  mapUrl: z.string().trim().url().max(2000).optional(),
+  source: z.string().trim().max(100).optional().default("Google Maps"),
+  notes: z.string().trim().max(1000).optional(),
+  score: z.number().int().min(0).max(100).optional(),
+  tags: z.array(z.string().trim().max(40)).optional().default([]),
+});
+
+export const importCafeLeadsSchema = z.object({
+  leads: z.array(cafeLeadCandidateSchema).min(1).max(100),
+});
+
+export const cafeCallOutcomeRequestSchema = z.object({
+  contactId: z.string().trim().min(3).max(80),
+  outcome: cafeCallOutcomeSchema,
+  summary: z.string().trim().max(1000).optional(),
+  meetingAt: z.string().datetime().optional(),
+  followUpAt: z.string().datetime().optional(),
+});
+
 export type UserRole = z.infer<typeof userRoleSchema>;
 export type CreateContactInput = z.infer<typeof createContactSchema>;
 export type CreateTaskInput = z.infer<typeof createTaskSchema>;
@@ -346,4 +390,6 @@ export type CreateNoteInput = z.infer<typeof createNoteSchema>;
 export type CreateCallInput = z.infer<typeof createCallSchema>;
 export type CreatePaymentInput = z.infer<typeof createPaymentSchema>;
 export type CreateDealInput = z.infer<typeof createDealSchema>;
+export type CafeCallOutcome = z.infer<typeof cafeCallOutcomeSchema>;
+export type CafeLeadCandidate = z.infer<typeof cafeLeadCandidateSchema>;
 export type PipelineStage = z.infer<typeof pipelineStageSchema>;

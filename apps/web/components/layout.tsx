@@ -18,11 +18,12 @@ type NavItem = {
 
 const primaryNav: NavItem[] = [
   { href: "/today", labelKey: "nav.today", aliases: ["/dashboard", "/agenda"], shortcut: "01" },
-  { href: "/contacts", labelKey: "nav.contacts", aliases: ["/companies"], shortcut: "02" },
-  { href: "/pipeline", labelKey: "nav.pipeline", aliases: ["/deals"], shortcut: "03" },
-  { href: "/tasks", labelKey: "nav.tasks", aliases: ["/follow-ups", "/payments"], shortcut: "04" },
-  { href: "/messages", labelKey: "nav.messages", aliases: ["/whatsapp", "/broadcasts"], shortcut: "05" },
-  { href: "/reports", labelKey: "nav.reports", aliases: ["/notifications"], shortcut: "06" },
+  { href: "/prospecting", labelKey: "nav.prospecting", aliases: ["/acquisition"], shortcut: "02" },
+  { href: "/contacts", labelKey: "nav.contacts", aliases: ["/companies"], shortcut: "03" },
+  { href: "/pipeline", labelKey: "nav.pipeline", aliases: ["/deals"], shortcut: "04" },
+  { href: "/tasks", labelKey: "nav.tasks", aliases: ["/follow-ups", "/payments"], shortcut: "05" },
+  { href: "/messages", labelKey: "nav.messages", aliases: ["/whatsapp", "/broadcasts"], shortcut: "06" },
+  { href: "/reports", labelKey: "nav.reports", aliases: ["/notifications"], shortcut: "07" },
 ];
 
 const secondaryNav: NavItem[] = [
