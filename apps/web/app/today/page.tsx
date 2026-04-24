@@ -44,6 +44,12 @@ export default function TodayPage() {
 
   const overview = overviewQuery.data;
   const totalCards = useMemo(() => overview?.counts ?? { overdue: 0, today: 0, tomorrow: 0, thisWeek: 0, unscheduled: 0, paymentAlerts: 0 }, [overview]);
+  const overdueItems = overview?.overdue ?? [];
+  const todayItems = overview?.today ?? [];
+  const tomorrowItems = overview?.tomorrow ?? [];
+  const weekItems = overview?.thisWeek ?? [];
+  const unscheduledItems = overview?.unscheduled ?? [];
+  const paymentAlerts = overview?.paymentAlerts ?? [];
 
   const refreshQueues = async () => {
     invalidateQueryCache("today");
@@ -130,15 +136,15 @@ export default function TodayPage() {
         </div>
 
         <div className="grid gap-6 xl:grid-cols-2">
-          <PlannerBucket title={t("today.bucketOverdueTitle")} description={t("today.bucketOverdueDescription")} items={overview?.overdue ?? []} busyId={busyId} onComplete={setCompletionItem} onReschedule={setRescheduleItem} />
-          <PlannerBucket title={t("today.bucketTodayTitle")} description={t("today.bucketTodayDescription")} items={overview?.today ?? []} busyId={busyId} onComplete={setCompletionItem} onReschedule={setRescheduleItem} />
-          <PlannerBucket title={t("today.bucketTomorrowTitle")} description={t("today.bucketTomorrowDescription")} items={overview?.tomorrow ?? []} busyId={busyId} onComplete={setCompletionItem} onReschedule={setRescheduleItem} />
-          <PlannerBucket title={t("today.bucketWeekTitle")} description={t("today.bucketWeekDescription")} items={overview?.thisWeek ?? []} busyId={busyId} onComplete={setCompletionItem} onReschedule={setRescheduleItem} />
+          <PlannerBucket title={t("today.bucketOverdueTitle")} description={t("today.bucketOverdueDescription")} items={overdueItems} busyId={busyId} onComplete={setCompletionItem} onReschedule={setRescheduleItem} />
+          <PlannerBucket title={t("today.bucketTodayTitle")} description={t("today.bucketTodayDescription")} items={todayItems} busyId={busyId} onComplete={setCompletionItem} onReschedule={setRescheduleItem} />
+          <PlannerBucket title={t("today.bucketTomorrowTitle")} description={t("today.bucketTomorrowDescription")} items={tomorrowItems} busyId={busyId} onComplete={setCompletionItem} onReschedule={setRescheduleItem} />
+          <PlannerBucket title={t("today.bucketWeekTitle")} description={t("today.bucketWeekDescription")} items={weekItems} busyId={busyId} onComplete={setCompletionItem} onReschedule={setRescheduleItem} />
         </div>
 
         <Card title={t("today.unscheduledTitle")} description={t("today.unscheduledDescription")}>
           <div className="space-y-3">
-            {overview?.unscheduled.length ? overview.unscheduled.map((item) => (
+            {unscheduledItems.length ? unscheduledItems.map((item) => (
               <ScheduledItemRow key={item.id} item={item} extraActions={<><button type="button" onClick={() => setFollowUpContact(item)} className={buttonStyles("primary", "sm")}>{t("common.schedule")}</button><Link href={`/contacts/view?id=${item.contactId}` as Route} className={buttonStyles("secondary", "sm")}>{t("common.openContact")}</Link></>} />
             )) : <EmptyState title={t("today.noUnscheduled")} description={t("today.noUnscheduledDescription")} />}
           </div>
@@ -146,11 +152,11 @@ export default function TodayPage() {
 
         <Card title={t("today.paymentAlertsTitle")} description={t("today.paymentAlertsDescription")}>
           <div className="space-y-3">
-            {overview?.paymentAlerts.length ? overview.paymentAlerts.map((payment) => (
+            {paymentAlerts.length ? paymentAlerts.map((payment) => (
               <div key={payment.id} className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4">
                 <div>
                   <div className="flex items-center gap-2">
-                    <p className="font-medium text-slate-900">{payment.contact.fullName}</p>
+                    <p className="font-medium text-slate-900">{payment.contact?.fullName ?? t("common.noContact")}</p>
                     <Badge tone={payment.status === "PAID" ? "emerald" : "amber"}>{labelStatus(payment.status)}</Badge>
                   </div>
                   <p className="mt-1 text-sm text-slate-500">{payment.label} · {formatNumber(payment.amount)} · {formatDateTime(payment.dueDate)}</p>
@@ -168,7 +174,7 @@ export default function TodayPage() {
       <MobileActionBar>
         <Link href={"/agenda" as Route} className={buttonStyles("secondary", "sm", true)}>{t("common.calendar")}</Link>
         <Link href={"/tasks" as Route} className={buttonStyles("secondary", "sm", true)}>{t("nav.tasks")}</Link>
-        <button type="button" onClick={() => setFollowUpContact(overview?.unscheduled[0] ?? null)} className={buttonStyles("primary", "sm", true)}>{t("today.scheduleNextStep")}</button>
+        <button type="button" onClick={() => setFollowUpContact(unscheduledItems[0] ?? null)} className={buttonStyles("primary", "sm", true)}>{t("today.scheduleNextStep")}</button>
       </MobileActionBar>
 
       <FollowUpDrawer open={Boolean(followUpContact)} onClose={() => setFollowUpContact(null)} contactLabel={followUpContact?.contactName || undefined} defaultTitle={followUpContact ? `${t("common.followUp")} ${followUpContact.contactName}` : ""} defaultDescription={followUpContact?.company ? `${t("workflows.context")}: ${followUpContact.company}` : ""} busy={savingFollowUp} onSubmit={createFollowUp} />

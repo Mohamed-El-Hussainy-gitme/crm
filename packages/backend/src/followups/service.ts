@@ -4,7 +4,7 @@ import { readJsonBody } from "../common/validation.js";
 import type { BackendEnv } from "../app.js";
 import type { AuthUser } from "../auth/types.js";
 import { CoreRepository } from "../core/repository.js";
-import type { ContactRow, TaskRow, UserProfileRow } from "../core/types.js";
+import type { ContactRow, PaymentRow, TaskRow, UserProfileRow } from "../core/types.js";
 import { addDays, CONTACT_TOUCH_TASK_TYPES, createId, dateAtEndOfDay, dateAtStartOfDay, endOfWeek, nowIso, parseDate, requireMinimumRole, requiresContactTouch } from "../core/utils.js";
 import { TasksService } from "../tasks/service.js";
 
@@ -53,6 +53,23 @@ function serializeScheduledContact(contact: ContactRow, reason: { missingSchedul
     reasons: {
       missingSchedule: Boolean(reason.missingSchedule),
       stale: Boolean(reason.stale),
+    },
+  };
+}
+
+
+function serializePaymentAlert(payment: PaymentRow, contact?: ContactRow | null) {
+  return {
+    id: payment.id,
+    label: payment.label,
+    amount: Number(payment.amount ?? 0),
+    dueDate: payment.dueDate,
+    status: payment.status,
+    contactId: payment.contactId,
+    contact: {
+      id: contact?.id ?? payment.contactId,
+      fullName: contact?.fullName ?? "Unknown contact",
+      company: contact?.company ?? null,
     },
   };
 }
@@ -123,7 +140,9 @@ export class FollowUpsService {
       }
     }
 
-    const paymentAlerts = payments.filter((payment) => payment.status === "OVERDUE" || (payment.status === "PENDING" && timestamp(payment.dueDate) < now.getTime()));
+    const paymentAlerts = payments
+      .filter((payment) => payment.status === "OVERDUE" || (payment.status === "PENDING" && timestamp(payment.dueDate) < now.getTime()))
+      .map((payment) => serializePaymentAlert(payment, contactsById.get(payment.contactId) ?? null));
 
     return {
       generatedAt: now.toISOString(),

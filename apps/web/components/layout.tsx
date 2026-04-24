@@ -35,8 +35,19 @@ function isActive(pathname: string, item: NavItem) {
 
 function navClass(active: boolean) {
   return [
-    "group flex items-center justify-between rounded-2xl px-3 py-3 text-sm font-medium transition",
-    active ? "bg-sky-50 text-sky-700" : "text-slate-600 hover:bg-slate-50 hover:text-slate-900",
+    "group flex min-h-11 items-center justify-between rounded-enterprise border px-3 py-3 text-sm font-semibold transition",
+    active
+      ? "border-enterprise-secondary bg-enterprise-secondary text-white shadow-sm"
+      : "border-transparent text-white/75 hover:border-white/20 hover:bg-white/10 hover:text-white",
+  ].join(" ");
+}
+
+function mobileNavClass(active: boolean) {
+  return [
+    "group flex min-h-11 items-center justify-between rounded-enterprise border px-3 py-3 text-sm font-semibold transition",
+    active
+      ? "border-enterprise-primary bg-enterprise-primary text-white"
+      : "border-enterprise-border bg-white text-enterprise-text hover:bg-enterprise-surface",
   ].join(" ");
 }
 
@@ -66,30 +77,30 @@ export function AppShell({ children }: { children: ReactNode }) {
   const visibleSecondary = secondaryNav.filter((item) => !item.minimumRole || can(item.minimumRole));
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900">
+    <div className="min-h-screen enterprise-grid-bg text-enterprise-text">
       <div className="mx-auto flex min-h-screen max-w-[1680px]">
-        <aside className="shell-sidebar hidden w-80 border-r border-slate-200 bg-white lg:flex lg:flex-col">
-          <div className="border-b border-slate-100 px-6 py-6">
+        <aside className="shell-sidebar hidden w-80 border-r border-white/10 bg-enterprise-primary text-white lg:flex lg:flex-col">
+          <div className="border-b border-white/10 px-6 py-6">
             <div className="flex items-start justify-between gap-4">
               <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.24em] text-sky-700">Hybrid CRM</p>
-                <h1 className="mt-2 text-xl font-semibold tracking-tight text-slate-900">{t("layout.brandTitle")}</h1>
-                <p className="mt-3 text-sm leading-6 text-slate-500">{t("layout.brandDescription")}</p>
+                <p className="text-xs font-bold uppercase tracking-[0.24em] text-enterprise-secondary">Enterprise CRM</p>
+                <h1 className="font-display mt-2 text-2xl font-semibold tracking-tight text-white">{t("layout.brandTitle")}</h1>
+                <p className="mt-3 text-sm leading-6 text-white/70">{t("layout.brandDescription")}</p>
               </div>
-              <Badge tone="sky">{t("layout.phaseBadge")}</Badge>
+              <Badge tone="amber">{t("layout.phaseBadge")}</Badge>
             </div>
           </div>
 
           <nav className="flex-1 space-y-8 px-4 py-6">
             <section>
-              <p className="px-3 text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">{t("common.dailyWorkflow")}</p>
+              <p className="px-3 text-xs font-bold uppercase tracking-[0.2em] text-white/40">{t("common.dailyWorkflow")}</p>
               <div className="mt-3 space-y-1">
                 {visiblePrimary.map((item) => {
                   const active = isActive(pathname, item);
                   return (
                     <Link key={item.href} href={item.href} className={navClass(active)}>
                       <span>{t(item.labelKey)}</span>
-                      <span className="text-xs text-slate-400 group-hover:text-slate-500">{navArrow}</span>
+                      <span className="text-xs text-current/70">{navArrow}</span>
                     </Link>
                   );
                 })}
@@ -97,23 +108,23 @@ export function AppShell({ children }: { children: ReactNode }) {
             </section>
 
             <section>
-              <p className="px-3 text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">{t("common.administration")}</p>
+              <p className="px-3 text-xs font-bold uppercase tracking-[0.2em] text-white/40">{t("common.administration")}</p>
               <div className="mt-3 space-y-1">
                 {visibleSecondary.map((item) => (
                   <Link key={item.href} href={item.href} className={navClass(isActive(pathname, item))}>
                     <span>{t(item.labelKey)}</span>
-                    <span className="text-xs text-slate-400">{navArrow}</span>
+                    <span className="text-xs text-current/70">{navArrow}</span>
                   </Link>
                 ))}
               </div>
             </section>
           </nav>
 
-          <div className="border-t border-slate-100 px-6 py-5">
-            <div className="rounded-[24px] border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600">
-              <p className="text-sm font-medium text-slate-900">{t("common.signedIn")}</p>
-              <p className="mt-2 text-sm font-semibold text-slate-800">{user?.fullName ?? "CRM User"}</p>
-              <p className="force-ltr mt-1 text-xs text-slate-500">{user?.email ?? "—"}</p>
+          <div className="border-t border-white/10 px-6 py-5">
+            <div className="rounded-enterprise border border-white/10 bg-white/10 p-4 text-sm text-white/70">
+              <p className="text-sm font-semibold text-white">{t("common.signedIn")}</p>
+              <p className="mt-2 text-sm font-bold text-white">{user?.fullName ?? "CRM User"}</p>
+              <p className="force-ltr mt-1 text-xs text-white/60">{user?.email ?? "—"}</p>
               <div className="mt-3 flex items-center justify-between gap-2">
                 <Badge tone={user?.role === "ADMIN" ? "emerald" : user?.role === "SALES_MANAGER" ? "sky" : "slate"}>{user?.role ?? "VIEWER"}</Badge>
                 <button
@@ -136,25 +147,25 @@ export function AppShell({ children }: { children: ReactNode }) {
         </aside>
 
         <div className="flex min-h-screen flex-1 flex-col pb-24 lg:pb-0">
-          <header className="sticky top-0 z-20 border-b border-slate-200 bg-white/90 backdrop-blur">
+          <header className="sticky top-0 z-20 border-b border-enterprise-border bg-white/93 backdrop-blur">
             <div className="flex items-center justify-between gap-4 px-4 py-4 md:px-6 lg:px-8">
               <div className="flex items-center gap-3">
                 <button
                   type="button"
                   onClick={() => setMobileOpen((current) => !current)}
-                  className="inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-slate-200 bg-white text-lg text-slate-700 lg:hidden"
+                  className="inline-flex h-11 w-11 items-center justify-center rounded-enterprise border border-enterprise-border bg-white text-lg text-enterprise-primary shadow-sm lg:hidden"
                   aria-label={t("layout.toggleNavigation")}
                 >
                   ☰
                 </button>
                 <div>
-                  <p className="text-xs font-medium uppercase tracking-[0.18em] text-slate-400">{t("common.workspace")}</p>
-                  <p className="text-sm font-semibold text-slate-900">{pageTitle}</p>
+                  <p className="text-xs font-bold uppercase tracking-[0.18em] text-enterprise-secondary">{t("common.workspace")}</p>
+                  <p className="font-display text-lg font-semibold text-enterprise-text">{pageTitle}</p>
                 </div>
               </div>
 
               <div className="flex items-center gap-3">
-                {user?.role ? <Badge>{user.role}</Badge> : null}
+                {user?.role ? <Badge tone={user.role === "ADMIN" ? "emerald" : "slate"}>{user.role}</Badge> : null}
                 <button type="button" onClick={() => setLocale(locale === "ar" ? "en" : "ar")} className={buttonStyles("secondary", "sm")}>{locale === "ar" ? t("common.english") : t("common.arabic")}</button>
                 <Link href={"/contacts" as Route} className={buttonStyles("primary", "sm")}>
                   {t("common.openContacts")}
@@ -164,12 +175,12 @@ export function AppShell({ children }: { children: ReactNode }) {
           </header>
 
           {mobileOpen ? (
-            <div className="border-b border-slate-200 bg-white px-4 py-4 lg:hidden">
+            <div className="border-b border-enterprise-border bg-enterprise-surface px-4 py-4 lg:hidden">
               <div className="grid gap-2">
                 {[...visiblePrimary, ...visibleSecondary].map((item) => (
-                  <Link key={item.href} href={item.href} className={navClass(isActive(pathname, item))} onClick={() => setMobileOpen(false)}>
+                  <Link key={item.href} href={item.href} className={mobileNavClass(isActive(pathname, item))} onClick={() => setMobileOpen(false)}>
                     <span>{t(item.labelKey)}</span>
-                    <span className="text-xs text-slate-400">{navArrow}</span>
+                    <span className="text-xs text-current/70">{navArrow}</span>
                   </Link>
                 ))}
               </div>

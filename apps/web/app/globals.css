@@ -4,6 +4,31 @@
 
 :root {
   color-scheme: light;
+  --crm-primary: #072c2c;
+  --crm-primary-muted: #123e3e;
+  --crm-primary-soft: #dbe8e3;
+  --crm-secondary: #ff5f03;
+  --crm-secondary-soft: #fff0e8;
+  --crm-success: #16a34a;
+  --crm-success-soft: #e8f7ee;
+  --crm-warning: #d97706;
+  --crm-warning-soft: #fff7ed;
+  --crm-danger: #dc2626;
+  --crm-danger-soft: #fef2f2;
+  --crm-surface: #edeade;
+  --crm-surface-strong: #e2ddcf;
+  --crm-panel: #ffffff;
+  --crm-border: #d5d0c3;
+  --crm-border-strong: #b9b19f;
+  --crm-text: #111827;
+  --crm-muted: #4b5563;
+  --crm-muted-soft: #6b7280;
+  --crm-focus: #ff5f03;
+  --crm-radius-sm: 0.625rem;
+  --crm-radius-md: 0.875rem;
+  --crm-radius-lg: 1rem;
+  --crm-shadow-panel: 0 10px 30px rgba(17, 24, 39, 0.08);
+  --crm-shadow-shell: 0 18px 60px rgba(7, 44, 44, 0.1);
 }
 
 html,
@@ -12,12 +37,16 @@ body {
 }
 
 body {
-  @apply bg-slate-50 text-slate-900 antialiased;
-  font-family: Inter, "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  @apply antialiased;
+  background:
+    radial-gradient(circle at top left, rgba(255, 95, 3, 0.10), transparent 32rem),
+    linear-gradient(180deg, #f7f4ec 0%, var(--crm-surface) 100%);
+  color: var(--crm-text);
+  font-family: Ubuntu, Inter, "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
 }
 
 html[lang="ar"] body {
-  font-family: Cairo, Tajawal, "IBM Plex Sans Arabic", "Segoe UI", Tahoma, Arial, sans-serif;
+  font-family: Cairo, Tajawal, "IBM Plex Sans Arabic", Ubuntu, "Segoe UI", Tahoma, Arial, sans-serif;
 }
 
 html[dir="rtl"] body {
@@ -25,11 +54,29 @@ html[dir="rtl"] body {
 }
 
 * {
-  @apply border-slate-200;
+  border-color: var(--crm-border);
+}
+
+::selection {
+  background: var(--crm-secondary);
+  color: #fff;
 }
 
 a {
   @apply transition-colors;
+}
+
+h1,
+h2,
+.font-display {
+  font-family: Oswald, Ubuntu, Inter, "Segoe UI", sans-serif;
+  letter-spacing: -0.015em;
+}
+
+code,
+pre,
+.force-mono {
+  font-family: "Ubuntu Mono", ui-monospace, SFMono-Regular, Consolas, monospace;
 }
 
 button,
@@ -43,8 +90,18 @@ textarea {
 input:focus,
 select:focus,
 textarea:focus,
-button:focus-visible {
-  @apply ring-2 ring-sky-500 ring-offset-2 ring-offset-white;
+button:focus-visible,
+a:focus-visible {
+  outline: 2px solid var(--crm-focus);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px rgba(255, 95, 3, 0.18);
+}
+
+button,
+input,
+select,
+textarea {
+  min-height: 2.75rem;
 }
 
 .force-ltr {
@@ -70,3 +127,76 @@ html[dir="rtl"] .drawer-panel {
 html[dir="rtl"] .drawer-root {
   justify-content: flex-start;
 }
+
+.enterprise-grid-bg {
+  background-image:
+    linear-gradient(rgba(7, 44, 44, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(7, 44, 44, 0.05) 1px, transparent 1px);
+  background-size: 28px 28px;
+}
+
+/* Enterprise token bridge for existing Tailwind-heavy pages. */
+.bg-slate-50 { background-color: #f7f4ec !important; }
+.bg-slate-100 { background-color: var(--crm-surface) !important; }
+.bg-slate-200 { background-color: var(--crm-surface-strong) !important; }
+.bg-white { background-color: var(--crm-panel) !important; }
+.bg-sky-50 { background-color: var(--crm-primary-soft) !important; }
+.bg-sky-600,
+.hover\:bg-sky-600:hover { background-color: var(--crm-primary) !important; }
+.hover\:bg-sky-700:hover,
+.bg-sky-700 { background-color: var(--crm-primary-muted) !important; }
+.bg-emerald-50 { background-color: var(--crm-success-soft) !important; }
+.bg-emerald-600,
+.hover\:bg-emerald-700:hover { background-color: var(--crm-success) !important; }
+.bg-amber-50 { background-color: var(--crm-warning-soft) !important; }
+.bg-rose-50 { background-color: var(--crm-danger-soft) !important; }
+.bg-rose-600,
+.hover\:bg-rose-700:hover { background-color: var(--crm-danger) !important; }
+.bg-slate-900,
+.bg-slate-950 { background-color: var(--crm-primary) !important; }
+.bg-slate-950\/40 { background-color: rgba(7, 44, 44, 0.78) !important; }
+.bg-white\/90,
+.bg-white\/95 { background-color: rgba(255, 255, 255, 0.93) !important; }
+.bg-white\/5 { background-color: rgba(255, 255, 255, 0.08) !important; }
+
+.text-sky-300 { color: #ffd0b8 !important; }
+.text-sky-600,
+.text-sky-700 { color: var(--crm-primary) !important; }
+.text-slate-900 { color: var(--crm-text) !important; }
+.text-slate-800 { color: #1f2937 !important; }
+.text-slate-700 { color: #374151 !important; }
+.text-slate-600 { color: var(--crm-muted) !important; }
+.text-slate-500 { color: var(--crm-muted-soft) !important; }
+.text-slate-400 { color: #7c7467 !important; }
+.text-emerald-700 { color: #0f7a37 !important; }
+.text-amber-700 { color: var(--crm-warning) !important; }
+.text-rose-700,
+.text-rose-400,
+.text-rose-300 { color: var(--crm-danger) !important; }
+.text-white { color: #ffffff !important; }
+
+.border-slate-100,
+.border-slate-200,
+.border-slate-300 { border-color: var(--crm-border) !important; }
+.border-slate-700,
+.border-slate-800 { border-color: rgba(255, 255, 255, 0.18) !important; }
+.border-sky-200,
+.border-sky-600 { border-color: var(--crm-primary) !important; }
+.border-emerald-200 { border-color: rgba(22, 163, 74, 0.32) !important; }
+.border-amber-100,
+.border-amber-200 { border-color: rgba(217, 119, 6, 0.32) !important; }
+.border-rose-200,
+.border-rose-900 { border-color: rgba(220, 38, 38, 0.36) !important; }
+
+.ring-sky-500,
+.focus\:ring-sky-500:focus,
+.focus-visible\:ring-sky-500:focus-visible { --tw-ring-color: var(--crm-focus) !important; }
+.shadow-sm { box-shadow: var(--crm-shadow-panel) !important; }
+.shadow-xl { box-shadow: var(--crm-shadow-shell) !important; }
+
+/* More enterprise-like geometry over the previous soft consumer rounding. */
+.rounded-\[32px\] { border-radius: 1rem !important; }
+.rounded-\[28px\] { border-radius: 1rem !important; }
+.rounded-\[24px\] { border-radius: 0.875rem !important; }
+.rounded-2xl { border-radius: 0.875rem !important; }
+.rounded-xl { border-radius: 0.75rem !important; }

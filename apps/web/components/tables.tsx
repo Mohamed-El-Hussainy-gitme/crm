@@ -42,10 +42,10 @@ export function ContactsTable({
   const { t, formatDateTime, labelPipelineStage } = useI18n();
 
   return (
-    <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+    <div className="overflow-hidden rounded-enterprise border border-enterprise-border bg-white shadow-panel">
       <div className="overflow-x-auto">
-        <table className="crm-table min-w-full divide-y divide-slate-200 text-sm">
-          <thead className="bg-slate-50 text-slate-500">
+        <table className="crm-table min-w-full divide-y divide-enterprise-border text-sm">
+          <thead className="bg-enterprise-surface text-enterprise-muted">
             <tr>
               {onToggle ? <th className="px-4 py-3 font-medium">{t("contacts.table.select")}</th> : null}
               <th className="px-4 py-3 font-medium">{t("contacts.table.contact")}</th>
@@ -57,7 +57,7 @@ export function ContactsTable({
               <th className="px-4 py-3 font-medium">{t("contacts.table.actions")}</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-100">
+          <tbody className="divide-y divide-enterprise-border">
             {contacts.map((contact) => (
               <tr key={contact.id} className="align-top">
                 {onToggle ? (
@@ -72,38 +72,38 @@ export function ContactsTable({
                 ) : null}
                 <td className="px-4 py-4">
                   <div>
-                    <p className="font-medium text-slate-900">{contact.fullName}</p>
-                    <p className="force-ltr mt-1 text-xs text-slate-500">{contact.id}</p>
+                    <p className="font-semibold text-enterprise-text">{contact.fullName}</p>
+                    <p className="force-ltr mt-1 text-xs text-enterprise-muted">{contact.id}</p>
                   </div>
                 </td>
-                <td className="px-4 py-4 text-slate-700">
+                <td className="px-4 py-4 text-enterprise-muted">
                   <div className="force-ltr">
                     <p>{contact.phone}</p>
-                    {contact.normalizedPhone ? <p className="mt-1 text-xs text-slate-500">WhatsApp +{contact.normalizedPhone}</p> : null}
+                    {contact.normalizedPhone ? <p className="mt-1 text-xs text-enterprise-muted">WhatsApp +{contact.normalizedPhone}</p> : null}
                   </div>
                 </td>
-                <td className="px-4 py-4 text-slate-700">
+                <td className="px-4 py-4 text-enterprise-muted">
                   <div>
                     <p>{contact.companyName || contact.company || "—"}</p>
-                    <p className="mt-1 text-xs text-slate-500">{contact.area || contact.locationText || t("common.noLocationYet")}</p>
+                    <p className="mt-1 text-xs text-enterprise-muted">{contact.area || contact.locationText || t("common.noLocationYet")}</p>
                   </div>
                 </td>
                 <td className="px-4 py-4">
                   <Badge tone={stageTone(contact.stage)}>{labelPipelineStage(contact.stage)}</Badge>
                 </td>
-                <td className="px-4 py-4 text-slate-700">{formatDateTime(contact.nextFollowUpAt)}</td>
+                <td className="px-4 py-4 text-enterprise-muted">{formatDateTime(contact.nextFollowUpAt)}</td>
                 <td className="px-4 py-4">
                   <div className="flex max-w-xs flex-wrap gap-2">
-                    {contact.tags?.length ? contact.tags.map((tag) => <Badge key={tag}>{tag}</Badge>) : <span className="text-slate-400">—</span>}
+                    {contact.tags?.length ? contact.tags.map((tag) => <Badge key={tag}>{tag}</Badge>) : <span className="text-enterprise-muted">—</span>}
                   </div>
                 </td>
                 <td className="px-4 py-4">
                   <div className="flex flex-wrap gap-2">
-                    <a href={contact.whatsappUrl} target="_blank" rel="noreferrer" className="rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs font-medium text-emerald-700 transition hover:bg-emerald-100">{t("common.whatsapp")}</a>
+                    <a href={contact.whatsappUrl} target="_blank" rel="noreferrer" className="rounded-xl border border-enterprise-success/30 bg-enterprise-success/10 px-3 py-2 text-xs font-semibold text-enterprise-success transition hover:bg-enterprise-success/20">{t("common.whatsapp")}</a>
                     {onEdit ? (
-                      <button type="button" onClick={() => onEdit(contact)} className="rounded-xl border border-slate-200 px-3 py-2 text-xs font-medium text-slate-700 transition hover:bg-slate-50">{t("common.edit")}</button>
+                      <button type="button" onClick={() => onEdit(contact)} className="rounded-xl border border-slate-200 px-3 py-2 text-xs font-medium text-enterprise-muted transition hover:bg-slate-50">{t("common.edit")}</button>
                     ) : null}
-                    <Link href={`/contacts/view?id=${contact.id}` as Route} className="rounded-xl border border-slate-200 px-3 py-2 text-xs font-medium text-slate-700 transition hover:bg-slate-50">{t("common.open")}</Link>
+                    <Link href={`/contacts/view?id=${contact.id}` as Route} className="rounded-xl border border-slate-200 px-3 py-2 text-xs font-medium text-enterprise-muted transition hover:bg-slate-50">{t("common.open")}</Link>
                   </div>
                 </td>
               </tr>

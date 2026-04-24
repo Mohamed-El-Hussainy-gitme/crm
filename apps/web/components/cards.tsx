@@ -3,19 +3,19 @@ import type { ReactNode } from "react";
 type Tone = "slate" | "sky" | "emerald" | "amber" | "rose";
 
 const badgeToneMap: Record<Tone, string> = {
-  slate: "border-slate-200 bg-slate-100 text-slate-700",
-  sky: "border-sky-200 bg-sky-50 text-sky-700",
-  emerald: "border-emerald-200 bg-emerald-50 text-emerald-700",
-  amber: "border-amber-200 bg-amber-50 text-amber-700",
-  rose: "border-rose-200 bg-rose-50 text-rose-700",
+  slate: "border-enterprise-border bg-enterprise-surface text-enterprise-text",
+  sky: "border-enterprise-primary bg-enterprise-primary/10 text-enterprise-primary",
+  emerald: "border-enterprise-success/30 bg-enterprise-success/10 text-enterprise-success",
+  amber: "border-enterprise-warning/30 bg-enterprise-warning/10 text-enterprise-warning",
+  rose: "border-enterprise-danger/30 bg-enterprise-danger/10 text-enterprise-danger",
 };
 
 const statToneMap: Record<Tone, string> = {
-  slate: "bg-white border-slate-200",
-  sky: "bg-sky-50 border-sky-100",
-  emerald: "bg-emerald-50 border-emerald-100",
-  amber: "bg-amber-50 border-amber-100",
-  rose: "bg-rose-50 border-rose-100",
+  slate: "border-enterprise-border bg-white",
+  sky: "border-enterprise-primary/30 bg-enterprise-primary/10",
+  emerald: "border-enterprise-success/30 bg-enterprise-success/10",
+  amber: "border-enterprise-warning/30 bg-enterprise-warning/10",
+  rose: "border-enterprise-danger/30 bg-enterprise-danger/10",
 };
 
 export function PageHeader({
@@ -30,11 +30,21 @@ export function PageHeader({
   actions?: ReactNode;
 }) {
   return (
-    <div className="flex flex-wrap items-start justify-between gap-4">
+    <div className="flex flex-wrap items-start justify-between gap-4 border-b border-enterprise-border pb-6">
       <div className="max-w-3xl">
-        {eyebrow ? <p className="text-sm font-semibold text-sky-700">{eyebrow}</p> : null}
-        <h1 className="mt-1 text-3xl font-semibold tracking-tight text-slate-900 md:text-[2rem]">{title}</h1>
-        {description ? <p className="mt-3 text-sm leading-6 text-slate-600">{description}</p> : null}
+        {eyebrow ? (
+          <p className="text-sm font-bold uppercase tracking-[0.18em] text-enterprise-secondary">
+            {eyebrow}
+          </p>
+        ) : null}
+        <h1 className="font-display mt-1 text-4xl font-semibold tracking-tight text-enterprise-text md:text-[2.5rem]">
+          {title}
+        </h1>
+        {description ? (
+          <p className="mt-3 max-w-2xl text-sm leading-6 text-enterprise-muted">
+            {description}
+          </p>
+        ) : null}
       </div>
       {actions ? <div className="flex flex-wrap gap-3">{actions}</div> : null}
     </div>
@@ -57,12 +67,12 @@ export function Card({
   className?: string;
 }) {
   return (
-    <section className={`overflow-hidden rounded-[28px] border border-slate-200 bg-white shadow-sm ${className}`.trim()}>
+    <section className={`overflow-hidden rounded-enterprise border border-enterprise-border bg-white shadow-panel ${className}`.trim()}>
       {title || description || actions || action ? (
-        <div className="flex flex-wrap items-start justify-between gap-3 border-b border-slate-100 px-5 py-4 md:px-6">
+        <div className="flex flex-wrap items-start justify-between gap-3 border-b border-enterprise-border bg-enterprise-surface px-5 py-4 md:px-6">
           <div className="max-w-2xl">
-            {title ? <h2 className="text-base font-semibold text-slate-900">{title}</h2> : null}
-            {description ? <p className="mt-1 text-sm leading-6 text-slate-500">{description}</p> : null}
+            {title ? <h2 className="font-display text-lg font-semibold text-enterprise-text">{title}</h2> : null}
+            {description ? <p className="mt-1 text-sm leading-6 text-enterprise-muted">{description}</p> : null}
           </div>
           {actions || action ? <div className="flex flex-wrap gap-2">{actions || action}</div> : null}
         </div>
@@ -84,10 +94,10 @@ export function StatCard({
   tone?: Tone;
 }) {
   return (
-    <div className={`rounded-[24px] border p-5 shadow-sm ${statToneMap[tone]}`}>
-      <p className="text-sm font-medium text-slate-500">{label}</p>
-      <p className="mt-2 text-3xl font-semibold tracking-tight text-slate-900">{value}</p>
-      {helper ? <p className="mt-2 text-sm text-slate-500">{helper}</p> : null}
+    <div className={`rounded-enterprise border p-5 shadow-panel ${statToneMap[tone]}`}>
+      <p className="text-sm font-semibold text-enterprise-muted">{label}</p>
+      <p className="font-display mt-2 text-4xl font-semibold tracking-tight text-enterprise-text">{value}</p>
+      {helper ? <p className="mt-2 text-sm leading-6 text-enterprise-muted">{helper}</p> : null}
     </div>
   );
 }
@@ -100,7 +110,7 @@ export function Badge({
   tone?: Tone;
 }) {
   return (
-    <span className={`inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-medium ${badgeToneMap[tone]}`}>
+    <span className={`inline-flex min-h-7 items-center rounded-full border px-3 py-1 text-xs font-bold uppercase tracking-[0.08em] ${badgeToneMap[tone]}`}>
       {children}
     </span>
   );
@@ -116,9 +126,9 @@ export function EmptyState({
   action?: ReactNode;
 }) {
   return (
-    <div className="rounded-[24px] border border-dashed border-slate-200 bg-slate-50 px-4 py-8 text-center">
-      <p className="text-sm font-medium text-slate-900">{title}</p>
-      <p className="mx-auto mt-2 max-w-lg text-sm leading-6 text-slate-500">{description}</p>
+    <div className="rounded-enterprise border border-dashed border-enterprise-border bg-enterprise-surface px-4 py-8 text-center">
+      <p className="font-display text-lg font-semibold text-enterprise-text">{title}</p>
+      <p className="mx-auto mt-2 max-w-lg text-sm leading-6 text-enterprise-muted">{description}</p>
       {action ? <div className="mt-4 flex justify-center">{action}</div> : null}
     </div>
   );
