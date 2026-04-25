@@ -9,7 +9,7 @@ import { buttonStyles, FieldShell, Input, Textarea } from "@/components/ui";
 import { apiFetch } from "@/lib/api";
 
 type Tone = "slate" | "sky" | "emerald" | "amber" | "rose";
-type ProspectingView = "command" | "intake" | "enrichment" | "scripts";
+type ProspectingView = "command" | "capture" | "intake" | "enrichment" | "scripts";
 
 type RecommendedAction = {
   key: string;
@@ -111,6 +111,17 @@ type Overview = {
   templates: Template[];
 };
 
+type DuplicateCandidate = {
+  id: string;
+  fullName: string;
+  phone: string;
+  area: string | null;
+  mapUrl: string | null;
+  stage: string;
+  reason: string;
+  score: number;
+};
+
 type ParsedLead = {
   id: string;
   name: string;
@@ -125,6 +136,8 @@ type ParsedLead = {
   confidence: "HIGH" | "MEDIUM" | "LOW";
   tags: string[];
   warnings: string[];
+  duplicateStatus?: "NEW" | "POSSIBLE_DUPLICATE";
+  duplicateCandidates?: DuplicateCandidate[];
 };
 
 type ImportResult = {
@@ -156,6 +169,7 @@ const quickOutcomes: Array<{ key: string; label: string; tone: Tone; helper: str
 
 const viewTabs: Array<{ key: ProspectingView; label: string; description: string }> = [
   { key: "command", label: "Command", description: "Call queue and next action" },
+  { key: "capture", label: "Capture", description: "Save places from Google Maps" },
   { key: "intake", label: "Maps intake", description: "Paste and import leads" },
   { key: "enrichment", label: "Enrichment", description: "Missing phones and areas" },
   { key: "scripts", label: "Scripts", description: "WhatsApp messages" },
@@ -215,6 +229,39 @@ function editableLeadPayload(lead: ParsedLead) {
     score: lead.score,
     tags: lead.tags,
   };
+}
+
+function decodeCapturePayload(value: string): unknown {
+  const normalized = value.replace(/-/g, "+").replace(/_/g, "/");
+  const padded = normalized.padEnd(normalized.length + ((4 - (normalized.length % 4)) % 4), "=");
+  const binary = atob(padded);
+  const bytes = Uint8Array.from(binary, (character) => character.charCodeAt(0));
+  return JSON.parse(new TextDecoder().decode(bytes));
+}
+
+function buildGoogleMapsBookmarklet(origin: string) {
+  const targetOrigin = JSON.stringify(origin);
+  const code = [
+    "(()=>{",
+    "const origin=", targetOrigin, ";",
+    "const clean=v=>(v||'').replace(/\\s+/g,' ').trim();",
+    "const nodes='h1,[aria-label],[data-item-id],button,a,div';",
+    "const text=clean(Array.from(document.querySelectorAll(nodes)).map(e=>e.getAttribute('aria-label')||e.textContent||'').filter(Boolean).join('\\n')).slice(0,7000);",
+    "const h1=clean(document.querySelector('h1')?.textContent||'');",
+    "const phone=(text.match(/(?:\\+?20|0020|0)?1[0125][\\s\\d().-]{8,16}/)||[''])[0];",
+    "const address=clean(Array.from(document.querySelectorAll('[data-item-id*=address],button[aria-label^=\\\"Address:\\\"],button[aria-label^=\\\"العنوان\\\"]')).map(e=>(e.getAttribute('aria-label')||e.textContent||'').replace(/^Address:\\s*/i,'').replace(/^العنوان:?\\s*/, '')).find(Boolean)||'');",
+    "const website=Array.from(document.querySelectorAll('a[href^=\\\"http\\\"]')).map(a=>a.href).find(h=>!/(google|gstatic|ggpht|schema)/i.test(h))||'';",
+    "const payload={name:h1,title:document.title,phone,address,website,pageUrl:location.href,rawText:text,capturedAt:new Date().toISOString(),source:'Google Maps Capture'};",
+    "const json=JSON.stringify(payload);",
+    "const data=btoa(unescape(encodeURIComponent(json))).replace(/\\+/g,'-').replace(/\\//g,'_').replace(/=+$/,'');",
+    "window.open(origin+'/prospecting?capture='+encodeURIComponent(data),'_blank','noopener,noreferrer');",
+    "})()",
+  ].join("");
+  return `javascript:${code}`;
+}
+
+function duplicateTone(count?: number): Tone {
+  return count ? "amber" : "emerald";
 }
 
 function uniqueContacts(groups: Array<ProspectingContact[] | undefined>) {
@@ -418,12 +465,15 @@ export default function ProspectingPage() {
   const [defaultArea, setDefaultArea] = useState("");
   const [parsedLeads, setParsedLeads] = useState<ParsedLead[]>([]);
   const [selectedLeadIds, setSelectedLeadIds] = useState<string[]>([]);
+  const [captureJson, setCaptureJson] = useState("");
+  const [captureOrigin, setCaptureOrigin] = useState("");
   const [importResults, setImportResults] = useState<ImportResult[]>([]);
   const [selectedArea, setSelectedArea] = useState("");
   const [selectedContactId, setSelectedContactId] = useState<string | null>(null);
   const [activeView, setActiveView] = useState<ProspectingView>("command");
   const [loading, setLoading] = useState(true);
   const [parsing, setParsing] = useState(false);
+  const [capturing, setCapturing] = useState(false);
   const [importing, setImporting] = useState(false);
   const [actioningContactId, setActioningContactId] = useState<string | null>(null);
   const [message, setMessage] = useState("");
@@ -447,6 +497,26 @@ export default function ProspectingPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedArea]);
 
+  useEffect(() => {
+    setCaptureOrigin(window.location.origin);
+    const params = new URLSearchParams(window.location.search);
+    const encodedCapture = params.get("capture");
+    if (!encodedCapture) return;
+
+    try {
+      const payload = decodeCapturePayload(encodedCapture);
+      void capturePayload(payload, true);
+      params.delete("capture");
+      const nextQuery = params.toString();
+      const nextUrl = window.location.pathname + (nextQuery ? `?${nextQuery}` : "");
+      window.history.replaceState({}, "", nextUrl);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Could not read captured Google Maps payload");
+      setActiveView("capture");
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const selectedParsedLeads = useMemo(
     () => parsedLeads.filter((lead) => selectedLeadIds.includes(lead.id)),
     [parsedLeads, selectedLeadIds],
@@ -466,6 +536,43 @@ export default function ProspectingPage() {
   const selectedContact = allVisibleContacts.find((contact) => contact.id === selectedContactId) ?? allVisibleContacts[0] ?? null;
   const counts = overview?.counts ?? { totalCafeLeads: 0, readyToCall: 0, needsPhone: 0, contacted: 0, meetings: 0 };
   const plan = overview?.dailyPlan;
+
+  const capturePayload = async (payload?: unknown, fromBookmarklet = false) => {
+    let actualPayload = payload;
+    if (actualPayload === undefined) {
+      const trimmed = captureJson.trim();
+      if (!trimmed) return;
+      try {
+        actualPayload = JSON.parse(trimmed);
+      } catch {
+        actualPayload = { rawText: trimmed, pageUrl: trimmed.startsWith("http") ? trimmed : undefined };
+      }
+    }
+
+    try {
+      setError("");
+      setMessage("");
+      setCapturing(true);
+      const data = await apiFetch<{ lead: ParsedLead; summary: { duplicateCandidates: number } }>("/acquisition/capture", {
+        method: "POST",
+        body: JSON.stringify({ payload: actualPayload, defaultArea: defaultArea || selectedArea || undefined }),
+      });
+      setParsedLeads((current) => {
+        const withoutSame = current.filter((lead) => lead.id !== data.lead.id);
+        return [data.lead, ...withoutSame];
+      });
+      setSelectedLeadIds((current) => Array.from(new Set([data.lead.id, ...current])));
+      setActiveView("capture");
+      setMessage(`${fromBookmarklet ? "Captured" : "Parsed"} ${data.lead.name}. ${data.summary.duplicateCandidates ? `${data.summary.duplicateCandidates} possible duplicate${data.summary.duplicateCandidates === 1 ? "" : "s"} found.` : "No duplicates detected."}`);
+      setCaptureJson("");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Could not capture Google Maps place");
+    } finally {
+      setCapturing(false);
+    }
+  };
+
+  const bookmarkletHref = captureOrigin ? buildGoogleMapsBookmarklet(captureOrigin) : "#";
 
   const parseInput = async () => {
     try {
@@ -548,6 +655,7 @@ export default function ProspectingPage() {
           actions={
             <div className="flex flex-wrap gap-3">
               <Link href={"/pipeline" as Route} className={buttonStyles("secondary")}>Demo pipeline</Link>
+              <button type="button" className={buttonStyles("secondary")} onClick={() => setActiveView("capture")}>Capture assistant</button>
               <button type="button" className={buttonStyles("secondary")} onClick={() => setActiveView("intake")}>Add Maps leads</button>
               <button type="button" className={buttonStyles("primary")} onClick={() => setInput(sampleMapsText)}>Load sample intake</button>
             </div>
@@ -622,7 +730,7 @@ export default function ProspectingPage() {
         </Card>
 
         <div className="rounded-xl border border-enterprise-border bg-white p-2 shadow-panel">
-          <div className="grid gap-2 md:grid-cols-4">
+          <div className="grid gap-2 md:grid-cols-5">
             {viewTabs.map((tab) => (
               <button
                 key={tab.key}
@@ -664,6 +772,105 @@ export default function ProspectingPage() {
             </div>
 
             <ContactActionPanel contact={selectedContact} templates={overview?.templates ?? []} actioningContactId={actioningContactId} onOutcome={applyOutcome} />
+          </div>
+        ) : null}
+
+        {activeView === "capture" ? (
+          <div className="grid gap-6 xl:grid-cols-[0.85fr_1.15fr]">
+            <div className="space-y-6">
+              <Card title="Google Maps Capture Assistant" description="Use this when a cafe page is open in Google Maps. It reads visible page text in your browser and sends a review payload to this CRM. No Google API key is required.">
+                <div className="space-y-5">
+                  <div className="rounded-xl border border-enterprise-border bg-enterprise-surface50 p-4">
+                    <p className="text-sm font-semibold text-enterprise-text">1. Drag this button to your bookmarks bar</p>
+                    <p className="mt-1 text-xs leading-5 text-enterprise-muted">Then open any Google Maps cafe page and click the bookmark. The CRM will open with a captured lead ready for review.</p>
+                    <div className="mt-4 flex flex-wrap gap-3">
+                      <a href={bookmarkletHref} className={buttonStyles("primary")} onClick={(event) => { if (!captureOrigin) event.preventDefault(); }}>Save to CRM</a>
+                      <button type="button" className={buttonStyles("secondary")} onClick={() => navigator.clipboard?.writeText(bookmarkletHref)}>Copy bookmarklet</button>
+                    </div>
+                  </div>
+
+                  <div className="rounded-xl border border-enterprise-border bg-white p-4">
+                    <p className="text-sm font-semibold text-enterprise-text">2. Manual fallback</p>
+                    <p className="mt-1 text-xs leading-5 text-enterprise-muted">If bookmarklets are blocked, paste copied Google Maps text, a Maps URL, or the JSON payload here.</p>
+                    <Textarea value={captureJson} onChange={(event) => setCaptureJson(event.target.value)} placeholder="Paste Google Maps visible text, a maps.app.goo.gl link, or captured JSON..." className="mt-3 min-h-44 font-mono text-xs" />
+                    <div className="mt-4 flex flex-wrap gap-3">
+                      <button type="button" className={buttonStyles("primary")} disabled={capturing || captureJson.trim().length < 3} onClick={() => void capturePayload()}>{capturing ? "Capturing..." : "Capture lead"}</button>
+                      <button type="button" className={buttonStyles("ghost")} onClick={() => setCaptureJson("")}>Clear</button>
+                    </div>
+                  </div>
+
+                  <div className="rounded-xl border border-enterprise-border bg-enterprise-primary p-4 text-white">
+                    <p className="text-xs font-bold uppercase tracking-[0.18em] text-enterprise-secondary">Workflow</p>
+                    <ol className="mt-3 list-decimal space-y-2 ps-5 text-sm leading-6 text-white/75">
+                      <li>Search cafes in Google Maps by area.</li>
+                      <li>Open a place profile and click Save to CRM.</li>
+                      <li>Review duplicate warnings, phone, area, and address.</li>
+                      <li>Import selected leads into the call queue.</li>
+                    </ol>
+                  </div>
+                </div>
+              </Card>
+            </div>
+
+            <Card
+              title="Capture review queue"
+              description="Captured places are not inserted until you approve them. Possible duplicates are shown before import."
+              actions={parsedLeads.length ? <button type="button" disabled={!selectedParsedLeads.length || importing} onClick={() => void importSelected()} className={buttonStyles("primary")}>{importing ? "Importing..." : `Import selected (${selectedParsedLeads.length})`}</button> : null}
+            >
+              {parsedLeads.length ? (
+                <div className="space-y-3">
+                  {parsedLeads.map((lead) => {
+                    const selected = selectedLeadIds.includes(lead.id);
+                    const duplicateCount = lead.duplicateCandidates?.length ?? 0;
+                    return (
+                      <div key={lead.id} className={`rounded-xl border p-4 shadow-sm ${duplicateCount ? "border-enterprise-warning/40 bg-enterprise-warning/5" : "border-enterprise-border bg-white"}`}>
+                        <div className="flex flex-wrap items-start justify-between gap-3">
+                          <label className="flex items-center gap-3 text-sm font-semibold text-enterprise-text">
+                            <input
+                              type="checkbox"
+                              checked={selected}
+                              onChange={(event) => setSelectedLeadIds((current) => event.target.checked ? [...current, lead.id] : current.filter((id) => id !== lead.id))}
+                              className="h-4 w-4 rounded border-enterprise-border text-enterprise-secondary"
+                            />
+                            <span>{lead.name}</span>
+                          </label>
+                          <div className="flex flex-wrap gap-2">
+                            <Badge tone={toneForConfidence(lead.confidence)}>{lead.confidence}</Badge>
+                            <Badge tone="sky">{lead.score}/100</Badge>
+                            <Badge tone={duplicateTone(duplicateCount)}>{duplicateCount ? `${duplicateCount} duplicate risk` : "new lead"}</Badge>
+                          </div>
+                        </div>
+                        <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+                          <FieldShell label="Cafe name"><Input value={lead.name} onChange={(event) => updateLead(lead.id, { name: event.target.value })} /></FieldShell>
+                          <FieldShell label="Phone"><Input value={lead.phone ?? ""} onChange={(event) => updateLead(lead.id, { phone: event.target.value || null })} placeholder="010..." /></FieldShell>
+                          <FieldShell label="Area"><Input value={lead.area ?? ""} onChange={(event) => updateLead(lead.id, { area: event.target.value || null })} /></FieldShell>
+                          <FieldShell label="Source"><Input value={lead.source} onChange={(event) => updateLead(lead.id, { source: event.target.value })} /></FieldShell>
+                          <div className="md:col-span-2"><FieldShell label="Address"><Input value={lead.address ?? ""} onChange={(event) => updateLead(lead.id, { address: event.target.value || null })} /></FieldShell></div>
+                          <div className="md:col-span-2"><FieldShell label="Maps URL"><Input value={lead.mapUrl ?? ""} onChange={(event) => updateLead(lead.id, { mapUrl: event.target.value || null })} /></FieldShell></div>
+                        </div>
+                        {duplicateCount ? (
+                          <div className="mt-4 rounded-lg border border-enterprise-warning/30 bg-white p-3">
+                            <p className="text-xs font-bold uppercase tracking-[0.16em] text-enterprise-warning">Possible duplicates</p>
+                            <div className="mt-2 space-y-2">
+                              {lead.duplicateCandidates?.map((candidate) => (
+                                <div key={candidate.id} className="flex flex-wrap items-center justify-between gap-3 rounded-md bg-enterprise-surface50 px-3 py-2 text-xs">
+                                  <span className="font-semibold text-enterprise-text">{candidate.fullName} · {candidate.area || "No area"}</span>
+                                  <span className="text-enterprise-muted">{candidate.reason} · {candidate.score}%</span>
+                                  <Link href={`/contacts/view?id=${candidate.id}` as Route} className="font-semibold text-enterprise-primary">Open</Link>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        ) : null}
+                        {lead.warnings.length ? <p className="mt-3 text-xs font-semibold text-enterprise-warning">{lead.warnings.join(" · ")}</p> : null}
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : (
+                <EmptyState title="No captured places yet" description="Use the Save to CRM bookmarklet on Google Maps, or paste a Maps payload in the assistant." />
+              )}
+            </Card>
           </div>
         ) : null}
 

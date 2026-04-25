@@ -5,6 +5,7 @@ import type { AuthUser } from "../auth/types.js";
 import { HttpError } from "../common/errors.js";
 import { jsonResponse } from "../common/http.js";
 import { parseMapsIntake } from "./maps-intake.js";
+import { duplicateCandidatesForLead, parseCapturedPlace } from "./capture-assistant.js";
 import { readJsonBody } from "../common/validation.js";
 import { createActivity } from "../core/business.js";
 import { CoreRepository } from "../core/repository.js";
@@ -477,15 +478,42 @@ export async function handleAcquisitionRoute(request: Request, env: BackendEnv, 
     });
   }
 
+  if (pathSegments.length === 2 && pathSegments[1] === "capture" && method === "POST") {
+    requireMinimumRole(user, ["SALES_REP", "SALES_MANAGER", "ADMIN"]);
+    const body = await readJsonBody(request);
+    const payload = body && typeof body === "object" && "payload" in body ? (body as { payload?: unknown }).payload : body;
+    const defaultArea = body && typeof body === "object" && typeof (body as { defaultArea?: unknown }).defaultArea === "string" ? String((body as { defaultArea: string }).defaultArea) : undefined;
+    const lead = parseCapturedPlace(payload, defaultArea ? { defaultArea } : {});
+    const contacts = await repo.contacts([], [{ column: "updatedAt", ascending: false }], 5000);
+    const duplicateCandidates = duplicateCandidatesForLead(lead, contacts);
+    return jsonResponse({
+      lead: {
+        ...lead,
+        duplicateCandidates,
+        duplicateStatus: duplicateCandidates.length ? "POSSIBLE_DUPLICATE" : "NEW",
+      },
+      summary: {
+        readyToCall: isRealPhone(lead.phone) ? 1 : 0,
+        needsPhone: isRealPhone(lead.phone) ? 0 : 1,
+        duplicateCandidates: duplicateCandidates.length,
+      },
+    });
+  }
+
   if (pathSegments.length === 2 && pathSegments[1] === "parse" && method === "POST") {
     requireMinimumRole(user, ["SALES_REP", "SALES_MANAGER", "ADMIN"]);
     const parsed = parseCafeLeadsSchema.safeParse(await readJsonBody(request));
     if (!parsed.success) throw new HttpError("Invalid Google Maps intake payload", 400, parsed.error.flatten());
     const chunks = chunkInput(parsed.data.input);
+    const contacts = await repo.contacts([], [{ column: "updatedAt", ascending: false }], 5000);
     const leads = (await Promise.all(chunks.slice(0, 50).map((chunk) => parseLeadChunkDeep(chunk, parsed.data.defaultArea, parsed.data.defaultSource))))
-      .filter((lead): lead is ParsedCafeLead => Boolean(lead));
+      .filter((lead): lead is ParsedCafeLead => Boolean(lead))
+      .map((lead) => {
+        const duplicateCandidates = duplicateCandidatesForLead(lead, contacts);
+        return { ...lead, duplicateCandidates, duplicateStatus: duplicateCandidates.length ? "POSSIBLE_DUPLICATE" : "NEW" };
+      });
     if (!leads.length) throw new HttpError("Could not detect any café leads from the pasted input", 400);
-    return jsonResponse({ leads, summary: { detected: leads.length, readyToCall: leads.filter((lead) => isRealPhone(lead.phone)).length, needsPhone: leads.filter((lead) => !isRealPhone(lead.phone)).length } });
+    return jsonResponse({ leads, summary: { detected: leads.length, readyToCall: leads.filter((lead) => isRealPhone(lead.phone)).length, needsPhone: leads.filter((lead) => !isRealPhone(lead.phone)).length, possibleDuplicates: leads.filter((lead) => lead.duplicateCandidates.length).length } });
   }
 
   if (pathSegments.length === 2 && pathSegments[1] === "import" && method === "POST") {
