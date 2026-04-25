@@ -11,11 +11,11 @@ const badgeToneMap: Record<Tone, string> = {
 };
 
 const statToneMap: Record<Tone, string> = {
-  slate: "border-transparent bg-enterprise-secondary before:bg-enterprise-primary",
-  sky: "border-transparent bg-enterprise-secondary before:bg-enterprise-primary",
-  emerald: "border-transparent bg-enterprise-secondary before:bg-enterprise-success",
-  amber: "border-transparent bg-enterprise-secondary before:bg-enterprise-warning",
-  rose: "border-transparent bg-enterprise-secondary before:bg-enterprise-danger",
+  slate: "bg-enterprise-panel before:bg-enterprise-primary",
+  sky: "bg-enterprise-panel before:bg-enterprise-primary",
+  emerald: "bg-enterprise-panel before:bg-enterprise-success",
+  amber: "bg-enterprise-panel before:bg-enterprise-warning",
+  rose: "bg-enterprise-panel before:bg-enterprise-danger",
 };
 
 export function PageHeader({
@@ -30,39 +30,29 @@ export function PageHeader({
   actions?: ReactNode;
 }) {
   return (
-    <div className="overflow-hidden rounded-enterprise border border-transparent bg-enterprise-secondary shadow-panel">
-      <div className="h-1.5 bg-gradient-to-r from-enterprise-primary via-enterprise-success to-enterprise-danger" />
-      <div className="px-5 py-5 md:px-6">
-        <div className="flex flex-wrap items-start justify-between gap-4">
-          <div className="max-w-4xl">
-            {eyebrow ? (
-              <p className="text-xs font-bold uppercase tracking-[0.2em] text-enterprise-primary">
-                {eyebrow}
-              </p>
-            ) : null}
-            <h1 className="font-display mt-2 text-3xl font-semibold tracking-tight text-enterprise-text md:text-4xl">
-              {title}
-            </h1>
-            {description ? (
-              <p className="mt-3 max-w-4xl text-sm leading-6 text-enterprise-muted">
-                {description}
-              </p>
-            ) : null}
-          </div>
-          {actions ? <div className="flex flex-wrap gap-3">{actions}</div> : null}
+    <div className="rounded-enterprise border border-transparent bg-enterprise-panel px-5 py-5 shadow-panel md:px-6 md:py-6">
+      <div className="flex flex-wrap items-start justify-between gap-4">
+        <div className="min-w-0 max-w-4xl">
+          {eyebrow ? (
+            <p className="text-xs font-bold uppercase tracking-[0.18em] text-enterprise-primary">
+              {eyebrow}
+            </p>
+          ) : null}
+          <h1 className="font-display mt-2 text-3xl font-bold tracking-tight text-enterprise-text md:text-4xl">
+            {title}
+          </h1>
+          {description ? (
+            <p className="mt-3 max-w-3xl text-sm leading-7 text-enterprise-muted">
+              {description}
+            </p>
+          ) : null}
         </div>
-      </div>
-      <div className="flex flex-wrap items-center gap-3 border-t border-enterprise-border bg-enterprise-surface px-5 py-3 text-xs font-bold uppercase tracking-[0.14em] text-enterprise-muted md:px-6">
-        <span className="h-2 w-2 rounded-full bg-enterprise-primary" />
-        <span>Backend driven</span>
-        <span className="h-1 w-1 rounded-full bg-enterprise-border" />
-        <span>Cloudflare Pages</span>
-        <span className="h-1 w-1 rounded-full bg-enterprise-border" />
-        <span>Supabase data</span>
+        {actions ? <div className="flex flex-wrap gap-3">{actions}</div> : null}
       </div>
     </div>
   );
 }
+
 export function Card({
   title,
   description,
@@ -79,11 +69,11 @@ export function Card({
   className?: string;
 }) {
   return (
-    <section className={`overflow-hidden rounded-enterprise border border-transparent bg-enterprise-secondary shadow-panel ${className}`.trim()}>
+    <section className={`overflow-hidden rounded-enterprise border border-transparent bg-enterprise-panel shadow-panel ${className}`.trim()}>
       {title || description || actions || action ? (
-        <div className="flex flex-wrap items-start justify-between gap-3 border-b border-enterprise-border bg-enterprise-secondary px-5 py-4 md:px-6">
-          <div className="max-w-2xl">
-            {title ? <h2 className="font-display text-xl font-semibold text-enterprise-text">{title}</h2> : null}
+        <div className="flex flex-wrap items-start justify-between gap-3 border-b border-enterprise-border/70 px-5 py-4 md:px-6">
+          <div className="min-w-0 max-w-2xl">
+            {title ? <h2 className="font-display text-xl font-bold text-enterprise-text">{title}</h2> : null}
             {description ? <p className="mt-1 text-sm leading-6 text-enterprise-muted">{description}</p> : null}
           </div>
           {actions || action ? <div className="flex flex-wrap gap-2">{actions || action}</div> : null}
@@ -106,10 +96,10 @@ export function StatCard({
   tone?: Tone;
 }) {
   return (
-    <div className={`relative overflow-hidden rounded-enterprise border p-4 shadow-panel before:absolute before:inset-y-0 before:start-0 before:w-1 ${statToneMap[tone]}`}>
+    <div className={`relative overflow-hidden rounded-enterprise border border-transparent p-4 shadow-panel before:absolute before:inset-y-4 before:start-0 before:w-1 before:rounded-full ${statToneMap[tone]}`}>
       <div className="ps-2">
-        <p className="text-sm font-semibold text-enterprise-muted">{label}</p>
-        <p className="font-display mt-2 text-4xl font-semibold tracking-tight text-enterprise-text">{value}</p>
+        <p className="text-sm font-bold text-enterprise-muted">{label}</p>
+        <p className="font-display mt-2 text-4xl font-bold tracking-tight text-enterprise-text">{value}</p>
         {helper ? <p className="mt-2 text-sm leading-6 text-enterprise-muted">{helper}</p> : null}
       </div>
     </div>
@@ -141,7 +131,7 @@ export function EmptyState({
 }) {
   return (
     <div className="rounded-enterprise border border-dashed border-enterprise-border bg-enterprise-surface px-4 py-10 text-center shadow-insetSoft">
-      <p className="font-display text-xl font-semibold text-enterprise-text">{title}</p>
+      <p className="font-display text-xl font-bold text-enterprise-text">{title}</p>
       <p className="mx-auto mt-2 max-w-lg text-sm leading-6 text-enterprise-muted">{description}</p>
       {action ? <div className="mt-5 flex justify-center">{action}</div> : null}
     </div>

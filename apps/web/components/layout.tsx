@@ -97,13 +97,13 @@ export function AppShell({ children }: { children: ReactNode }) {
       <div className="flex min-h-screen">
         <aside className="shell-sidebar hidden w-[17.5rem] shrink-0 border-r border-enterprise-border text-enterprise-text md:flex md:flex-col">
           <div className="px-5 py-5">
-            <div className="rounded-enterprise border border-transparent bg-enterprise-secondary p-4 shadow-panel">
+            <div className="rounded-enterprise border border-transparent bg-enterprise-panel p-4 shadow-panel">
               <div className="flex items-center gap-3">
-                <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-enterprise-primary text-base font-black text-white shadow-panel">
+                <div className="flex h-11 w-11 items-center justify-center rounded-enterprise bg-enterprise-primary text-base font-black text-white shadow-panel">
                   CRM
                 </div>
                 <div>
-                  <p className="text-[0.67rem] font-bold uppercase tracking-[0.24em] text-enterprise-muted">Neumorphism</p>
+                  <p className="text-[0.67rem] font-bold uppercase tracking-[0.24em] text-enterprise-muted">Ahwa sales</p>
                   <h1 className="font-display text-xl font-semibold tracking-tight text-enterprise-text">{t("layout.brandTitle")}</h1>
                 </div>
               </div>
@@ -174,7 +174,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         </aside>
 
         <div className="flex min-h-screen min-w-0 flex-1 flex-col pb-20 md:pb-0">
-          <header className="sticky top-0 z-30 border-b border-enterprise-border bg-enterprise-surface/92 backdrop-blur-xl">
+          <header className="sticky top-0 z-30 border-b border-enterprise-border bg-enterprise-surface/90 backdrop-blur-xl">
             <div className="flex min-h-[4.5rem] items-center justify-between gap-4 px-4 md:px-6 xl:px-8">
               <div className="flex min-w-0 items-center gap-3">
                 <button
@@ -188,8 +188,6 @@ export function AppShell({ children }: { children: ReactNode }) {
                 <div className="min-w-0">
                   <div className="flex items-center gap-2 text-[0.68rem] font-bold uppercase tracking-[0.18em] text-enterprise-muted">
                     <span>{t("common.workspace")}</span>
-                    <span className="h-1 w-1 rounded-full bg-enterprise-primary" />
-                    <span className="hidden sm:inline">Cloudflare</span>
                   </div>
                   <p className="font-display truncate text-2xl font-semibold tracking-tight text-enterprise-text">{pageTitle}</p>
                 </div>

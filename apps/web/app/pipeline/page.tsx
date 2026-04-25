@@ -72,10 +72,10 @@ const stageTone: Record<AhwaPipelineStage, "slate" | "sky" | "emerald" | "amber"
 };
 
 const demoTypeLabels: Record<DemoType, string> = {
-  IN_PERSON: "In-person",
-  PHONE: "Phone",
-  WHATSAPP: "WhatsApp",
-  ONLINE: "Online",
+  IN_PERSON: "زيارة",
+  PHONE: "مكالمة",
+  WHATSAPP: "واتساب",
+  ONLINE: "أونلاين",
 };
 
 function addDaysLocal(days: number, hour = 10) {
@@ -111,7 +111,7 @@ function StageSwitcher({
   onChange: (stage: AhwaPipelineStage) => void;
 }) {
   return (
-    <Card title="Pipeline stages" description="Choose one commercial step and work its leads without scanning a crowded board.">
+    <Card title="مراحل البيع" description="اختر مرحلة واحدة واعمل على فرصها بدون زحام بصري.">
       <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
         {overview.board.map((stage) => {
           const active = stage.key === activeStage;
@@ -159,7 +159,7 @@ function ContactRow({
             <Badge tone={scoreTone(contact.score)}>{contact.score}</Badge>
             <Badge tone={urgentTone(contact.nextAction.urgency)}>{contact.nextAction.urgency}</Badge>
           </div>
-          <p className="mt-1 text-sm leading-6 text-enterprise-muted">{contact.area || "No area"} · {contact.phone || "No phone"} · {contact.nextAction.label}</p>
+          <p className="mt-1 text-sm leading-6 text-enterprise-muted">{contact.area || "بدون منطقة"} · {contact.phone || "بدون رقم"} · {contact.nextAction.label}</p>
           <div className="mt-3 flex flex-wrap gap-2 text-xs text-enterprise-muted">
             {contact.demoTask ? <span className="rounded-md bg-enterprise-surface px-2 py-1">Demo {new Date(contact.demoTask.dueAt).toLocaleString()}</span> : null}
             {contact.deal ? <span className="rounded-md bg-enterprise-surface px-2 py-1">{contact.deal.stage} · {compactMoney(contact.deal.amount)}</span> : null}
@@ -167,8 +167,8 @@ function ContactRow({
           </div>
         </div>
         <div className="flex flex-wrap gap-2">
-          <a href={`tel:${contact.phone}`} onClick={(event) => event.stopPropagation()} className={buttonStyles("primary", "sm")}>Call</a>
-          <a href={contact.whatsappUrl} onClick={(event) => event.stopPropagation()} target="_blank" rel="noreferrer" className={buttonStyles("success", "sm")}>WhatsApp</a>
+          <a href={`tel:${contact.phone}`} onClick={(event) => event.stopPropagation()} className={buttonStyles("primary", "sm")}>اتصال</a>
+          <a href={contact.whatsappUrl} onClick={(event) => event.stopPropagation()} target="_blank" rel="noreferrer" className={buttonStyles("success", "sm")}>واتساب</a>
         </div>
       </div>
     </button>
@@ -238,13 +238,13 @@ function ActionPanel({
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
               <p className="font-display text-2xl font-semibold text-enterprise-text">{contact.fullName}</p>
-              <p className="mt-1 text-sm text-enterprise-muted">{contact.area || "No area"} · {contact.phone || "No phone"}</p>
+              <p className="mt-1 text-sm text-enterprise-muted">{contact.area || "بدون منطقة"} · {contact.phone || "بدون رقم"}</p>
             </div>
             <Badge tone={stageTone[contact.pipelineStage]}>{contact.pipelineStage.replaceAll("_", " ")}</Badge>
           </div>
           <div className="mt-4 grid gap-2 sm:grid-cols-2">
-            <a href={`tel:${contact.phone}`} className={buttonStyles("primary", "sm")}>Call</a>
-            <a href={contact.whatsappUrl} target="_blank" rel="noreferrer" className={buttonStyles("success", "sm")}>WhatsApp</a>
+            <a href={`tel:${contact.phone}`} className={buttonStyles("primary", "sm")}>اتصال</a>
+            <a href={contact.whatsappUrl} target="_blank" rel="noreferrer" className={buttonStyles("success", "sm")}>واتساب</a>
             {contact.mapUrl ? <a href={contact.mapUrl} target="_blank" rel="noreferrer" className={buttonStyles("secondary", "sm")}>Maps</a> : null}
             <Link href={`/contacts/view?id=${contact.id}` as Route} className={buttonStyles("secondary", "sm")}>Contact file</Link>
           </div>
@@ -253,9 +253,9 @@ function ActionPanel({
         <div className="grid gap-2 sm:grid-cols-2">
           <button type="button" onClick={() => setMode("SCHEDULE_DEMO")} className={buttonStyles(mode === "SCHEDULE_DEMO" ? "primary" : "secondary", "sm")}>Book demo</button>
           <button type="button" onClick={() => setMode("MARK_DEMO_DONE")} className={buttonStyles(mode === "MARK_DEMO_DONE" ? "primary" : "secondary", "sm")}>Demo done</button>
-          <button type="button" onClick={() => setMode("OFFER_TRIAL")} className={buttonStyles(mode === "OFFER_TRIAL" ? "primary" : "secondary", "sm")}>Offer trial</button>
-          <button type="button" onClick={() => setMode("MARK_WON")} className={buttonStyles(mode === "MARK_WON" ? "success" : "secondary", "sm")}>Mark won</button>
-          <button type="button" onClick={() => setMode("MARK_LOST")} className={buttonStyles(mode === "MARK_LOST" ? "danger" : "secondary", "sm")}>Mark lost</button>
+          <button type="button" onClick={() => setMode("OFFER_TRIAL")} className={buttonStyles(mode === "OFFER_TRIAL" ? "primary" : "secondary", "sm")}>عرض تجربة</button>
+          <button type="button" onClick={() => setMode("MARK_WON")} className={buttonStyles(mode === "MARK_WON" ? "success" : "secondary", "sm")}>عميل جديد</button>
+          <button type="button" onClick={() => setMode("MARK_LOST")} className={buttonStyles(mode === "MARK_LOST" ? "danger" : "secondary", "sm")}>خسارة</button>
         </div>
 
         <div className="rounded-enterprise border border-enterprise-border bg-white p-4">
@@ -289,7 +289,7 @@ function ActionPanel({
               </div>
               <label className="flex items-center gap-3 rounded-enterprise border border-enterprise-border bg-enterprise-surface px-4 py-3 text-sm font-semibold text-enterprise-text">
                 <input type="checkbox" checked={offerTrial} onChange={(event) => setOfferTrial(event.target.checked)} className="h-4 w-4" />
-                Offer trial directly after this demo
+                عرض تجربة directly after this demo
               </label>
               <FieldShell label="Next follow-up"><Input type="datetime-local" value={followUpAt} onChange={(event) => setFollowUpAt(event.target.value)} /></FieldShell>
             </>
@@ -317,7 +317,7 @@ function ActionPanel({
           ) : null}
 
           <button type="submit" disabled={busy} className={buttonStyles(mode === "MARK_LOST" ? "danger" : mode === "MARK_WON" ? "success" : "primary", "md", true)}>
-            {busy ? "Saving..." : "Save pipeline action"}
+            {busy ? "جارٍ الحفظ..." : "حفظ الحركة"}
           </button>
         </form>
       </div>
@@ -348,7 +348,7 @@ export default function PipelinePage() {
       setActiveStage((current) => data.board.some((stage) => stage.key === current) ? current : firstNonEmpty);
       setSelectedId((current) => current ?? data.focus[0]?.id ?? data.board.flatMap((stage) => stage.contacts)[0]?.id ?? null);
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Failed to load Ahwa demo pipeline");
+      setError(e instanceof Error ? e.message : "تعذر تحميل مسار العروض");
     }
   };
 
@@ -368,7 +368,7 @@ export default function PipelinePage() {
       await apiPost(endpoint[action], payload);
       await load();
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Unable to save pipeline action");
+      setError(e instanceof Error ? e.message : "تعذر حفظ حركة المسار");
     } finally {
       setBusy(false);
     }
@@ -378,10 +378,10 @@ export default function PipelinePage() {
     <AppShell>
       <div className="space-y-6">
         <PageHeader
-          eyebrow="Ahwa Sales Pipeline"
-          title="Move cafes from interest to paid customer"
-          description="A focused commercial workflow for demos, trials, lost reasons, and close actions. Pick a stage, select one cafe, and run the next action."
-          actions={<Link href={"/prospecting" as Route} className={buttonStyles("secondary", "sm")}>Prospecting console</Link>}
+          eyebrow="مسار مبيعات Ahwa"
+          title="حوّل الاهتمام إلى عميل مدفوع"
+          description="مسار واضح لحجز العروض، تسجيل نتيجة الديمو، عرض التجربة، وتحديد سبب الخسارة."
+          actions={<Link href={"/prospecting" as Route} className={buttonStyles("secondary", "sm")}>مساحة الترويج</Link>}
         />
 
         {error ? <div className="rounded-enterprise border border-enterprise-danger/30 bg-enterprise-danger/10 px-4 py-3 text-sm font-semibold text-enterprise-danger">{error}</div> : null}
@@ -389,27 +389,27 @@ export default function PipelinePage() {
         {overview ? (
           <>
             <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-6">
-              <StatCard label="Active cafes" value={overview.summary.activeProspects} helper="Not won/lost yet" tone="sky" />
-              <StatCard label="Scheduled demos" value={overview.summary.scheduledDemos} helper="Meetings booked" tone="amber" />
-              <StatCard label="Trials" value={overview.summary.trials} helper="Trial follow-up required" tone="emerald" />
-              <StatCard label="Won" value={overview.summary.won} helper="Customers" tone="emerald" />
-              <StatCard label="Open value" value={formatCurrency(overview.summary.openPipelineValue)} helper="Open deal value" tone="slate" />
-              <StatCard label="Demo conversion" value={`${overview.summary.demoConversionRate}%`} helper="Won vs demo/lost set" tone="sky" />
+              <StatCard label="فرص نشطة" value={overview.summary.activeProspects} helper="ليست عميلًا أو خسارة" tone="sky" />
+              <StatCard label="عروض مجدولة" value={overview.summary.scheduledDemos} helper="مواعيد محجوزة" tone="amber" />
+              <StatCard label="تجارب" value={overview.summary.trials} helper="تحتاج متابعة" tone="emerald" />
+              <StatCard label="عملاء" value={overview.summary.won} helper="تم الإغلاق" tone="emerald" />
+              <StatCard label="قيمة مفتوحة" value={formatCurrency(overview.summary.openPipelineValue)} helper="قيمة الصفقات المفتوحة" tone="slate" />
+              <StatCard label="تحويل العروض" value={`${overview.summary.demoConversionRate}%`} helper="نسبة الإغلاق بعد العرض" tone="sky" />
             </div>
 
             <StageSwitcher overview={overview} activeStage={activeStage} onChange={(stage) => { setActiveStage(stage); setSelectedId(overview.board.find((item) => item.key === stage)?.contacts[0]?.id ?? null); }} />
 
             <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_28rem]">
               <div className="space-y-6">
-                <Card title={activeBucket?.label ?? "Stage leads"} description={activeBucket?.description ?? "Select a lead to run the next commercial action."}>
+                <Card title={activeBucket?.label ?? "فرص المرحلة"} description={activeBucket?.description ?? "اختر فرصة لتحديد الحركة التجارية التالية."}>
                   <div className="space-y-3">
                     {stageContacts.length ? stageContacts.map((contact) => (
                       <ContactRow key={contact.id} contact={contact} active={selected?.id === contact.id} onSelect={(next) => setSelectedId(next.id)} />
-                    )) : <EmptyState title="No cafes in this step" description="Move interested cafes here from the prospecting console or choose another stage." />}
+                    )) : <EmptyState title="لا توجد مقاهٍ في هذه المرحلة" description="انقل المقاهي المهتمة من مساحة الترويج أو اختر مرحلة أخرى." />}
                   </div>
                 </Card>
 
-                <Card title="Demo checklist" description="Use this before each Ahwa demo so every meeting captures the facts needed to close.">
+                <Card title="قائمة العرض" description="استخدمها قبل كل عرض حتى لا تفقد المعلومات المطلوبة للإغلاق.">
                   <div className="grid gap-3 md:grid-cols-2">
                     {overview.checklist.map((item, index) => (
                       <div key={item} className="flex gap-3 rounded-enterprise border border-enterprise-border bg-white p-4">
@@ -422,9 +422,9 @@ export default function PipelinePage() {
               </div>
 
               <div className="space-y-6">
-                {selected ? <ActionPanel contact={selected} overview={overview} mode={mode} setMode={setMode} busy={busy} onSubmit={submitAction} /> : <EmptyState title="No pipeline leads" description="Import cafes from Google Maps first, then interested leads will appear here." />}
+                {selected ? <ActionPanel contact={selected} overview={overview} mode={mode} setMode={setMode} busy={busy} onSubmit={submitAction} /> : <EmptyState title="لا توجد فرص في المسار" description="أدخل المقاهي من Google Maps أولًا، ثم ستظهر الفرص المهتمة هنا." />}
 
-                <Card title="Focus list" description="Highest scoring cafes that need a commercial move.">
+                <Card title="قائمة التركيز" description="أفضل المقاهي التي تحتاج حركة تجارية الآن.">
                   <div className="space-y-3">
                     {overview.focus.length ? overview.focus.slice(0, 8).map((contact) => (
                       <button key={contact.id} type="button" onClick={() => { setActiveStage(contact.pipelineStage); setSelectedId(contact.id); }} className="w-full rounded-enterprise border border-enterprise-border bg-white p-3 text-start hover:border-enterprise-primary hover:bg-enterprise-surface50">
@@ -437,14 +437,14 @@ export default function PipelinePage() {
                           <Badge tone={urgentTone(contact.nextAction.urgency)}>{contact.nextAction.urgency}</Badge>
                         </div>
                       </button>
-                    )) : <EmptyState title="No focus items" description="There are no active prospects that require attention right now." />}
+                    )) : <EmptyState title="لا توجد عناصر تركيز" description="لا توجد فرص نشطة تحتاج حركة الآن." />}
                   </div>
                 </Card>
               </div>
             </div>
           </>
         ) : (
-          <Card><p className="text-sm font-semibold text-enterprise-muted">Loading Ahwa demo pipeline...</p></Card>
+          <Card><p className="text-sm font-semibold text-enterprise-muted">جارٍ تحميل مسار العروض...</p></Card>
         )}
       </div>
     </AppShell>

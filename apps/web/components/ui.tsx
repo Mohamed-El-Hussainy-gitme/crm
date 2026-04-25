@@ -132,11 +132,11 @@ export function Drawer({
       />
       <div
         className={cx(
-          "drawer-panel h-full w-full overflow-y-auto border-l border-enterprise-border bg-white shadow-2xl",
+          "drawer-panel h-full w-full overflow-y-auto border-l border-enterprise-border bg-enterprise-panel shadow-popover",
           widthClass,
         )}
       >
-        <div className="sticky top-0 z-10 border-b border-enterprise-border bg-white/95 px-6 py-5 backdrop-blur">
+        <div className="sticky top-0 z-10 border-b border-enterprise-border bg-enterprise-panel/95 px-6 py-5 backdrop-blur">
           <div className="flex items-start justify-between gap-4">
             <div>
               <p className="text-xs font-bold uppercase tracking-[0.2em] text-enterprise-secondary">
@@ -222,7 +222,7 @@ export function ListRow({
         "rounded-enterprise border px-4 py-4",
         highlighted
           ? "border-enterprise-primary bg-enterprise-primary/10 shadow-insetSoft"
-          : "border-transparent bg-enterprise-secondary shadow-panel",
+          : "border-transparent bg-enterprise-panel shadow-panel",
       )}
     >
       <div className="flex flex-wrap items-start justify-between gap-4">

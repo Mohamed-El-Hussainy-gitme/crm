@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap");
 
 @tailwind base;
 @tailwind components;
@@ -7,36 +7,30 @@
 :root {
   color-scheme: light;
   --crm-primary: #006666;
-  --crm-primary-900: #004747;
-  --crm-primary-800: #005151;
+  --crm-primary-900: #004b4b;
+  --crm-primary-800: #005858;
   --crm-primary-700: #006666;
   --crm-secondary: #f1f2f5;
-  --crm-secondary-700: #d7d9df;
-  --crm-secondary-50: #f8f9fb;
   --crm-success: #00a63d;
-  --crm-success-50: #eafbf0;
   --crm-warning: #fe9900;
-  --crm-warning-50: #fff6e6;
   --crm-danger: #ff2157;
-  --crm-danger-50: #fff0f4;
   --crm-info: #0ea5e9;
   --crm-surface: #e7e5e4;
-  --crm-surface-50: #f1f2f5;
-  --crm-surface-100: #e7e5e4;
-  --crm-surface-200: #d4d4d8;
   --crm-panel: #f1f2f5;
+  --crm-panel-strong: #f7f8fa;
   --crm-text: #1e2938;
   --crm-muted: #64748b;
-  --crm-muted-2: #718096;
+  --crm-muted-2: #7c8798;
   --crm-border: rgba(30, 41, 56, 0.12);
-  --crm-border-strong: rgba(30, 41, 56, 0.24);
+  --crm-border-strong: rgba(30, 41, 56, 0.22);
   --crm-focus: #006666;
-  --crm-radius-sm: 0.85rem;
-  --crm-radius-md: 1.125rem;
-  --crm-radius-lg: 1.5rem;
-  --crm-shadow-panel: 8px 8px 18px rgba(174,171,170,0.58), -8px -8px 18px rgba(255,255,255,0.9);
-  --crm-shadow-popover: 16px 16px 42px rgba(123, 121, 121, 0.36), -12px -12px 36px rgba(255,255,255,0.95);
-  --crm-shadow-inset: inset 5px 5px 12px rgba(174,171,170,0.58), inset -5px -5px 12px rgba(255,255,255,0.86);
+  --crm-radius-sm: 0.9rem;
+  --crm-radius-md: 1.25rem;
+  --crm-radius-lg: 1.7rem;
+  --crm-shadow-panel: 10px 10px 24px rgba(163, 160, 158, 0.45), -10px -10px 24px rgba(255, 255, 255, 0.88);
+  --crm-shadow-panel-sm: 6px 6px 14px rgba(163, 160, 158, 0.34), -6px -6px 14px rgba(255, 255, 255, 0.82);
+  --crm-shadow-popover: 18px 18px 44px rgba(103, 105, 115, 0.28), -14px -14px 34px rgba(255, 255, 255, 0.9);
+  --crm-shadow-inset: inset 5px 5px 12px rgba(163, 160, 158, 0.44), inset -5px -5px 12px rgba(255, 255, 255, 0.82);
 }
 
 html,
@@ -47,16 +41,17 @@ body {
 body {
   @apply antialiased;
   background:
-    radial-gradient(circle at 12% 8%, rgba(0, 102, 102, 0.11), transparent 22rem),
-    radial-gradient(circle at 92% 4%, rgba(255, 33, 87, 0.07), transparent 20rem),
+    radial-gradient(circle at 10% 10%, rgba(0, 102, 102, 0.08), transparent 22rem),
+    radial-gradient(circle at 90% 6%, rgba(254, 153, 0, 0.06), transparent 18rem),
     var(--crm-surface);
   color: var(--crm-text);
-  font-family: "Space Mono", ui-monospace, SFMono-Regular, Consolas, monospace;
+  font-family: "Space Mono", "Segoe UI", Tahoma, system-ui, sans-serif;
   font-size: 14px;
+  line-height: 1.6;
 }
 
 html[lang="ar"] body {
-  font-family: "Space Mono", "JetBrains Mono", ui-monospace, SFMono-Regular, Consolas, monospace;
+  font-family: "Space Mono", "Segoe UI", Tahoma, Arial, sans-serif;
 }
 
 html[dir="rtl"] body { direction: rtl; }
@@ -65,8 +60,15 @@ html[dir="rtl"] body { direction: rtl; }
 a { @apply transition-colors; }
 
 h1, h2, h3, .font-display {
-  font-family: "Space Mono", ui-monospace, SFMono-Regular, Consolas, monospace;
-  letter-spacing: -0.045em;
+  font-family: "Space Mono", "Segoe UI", Tahoma, system-ui, sans-serif;
+  letter-spacing: -0.025em;
+}
+html[dir="rtl"] h1,
+html[dir="rtl"] h2,
+html[dir="rtl"] h3,
+html[dir="rtl"] .font-display {
+  letter-spacing: 0;
+  line-height: 1.45;
 }
 
 code, pre, .force-mono {
@@ -77,34 +79,36 @@ button, input, select, textarea {
   @apply transition outline-none;
   text-align: start;
 }
-button, input, select, textarea { min-height: 2.35rem; }
+button, input, select, textarea { min-height: 2.55rem; }
+input, select, textarea { line-height: 1.55; }
 
 input:focus, select:focus, textarea:focus, button:focus-visible, a:focus-visible {
   outline: 2px solid var(--crm-focus);
   outline-offset: 3px;
-  box-shadow: 0 0 0 5px rgba(0,102,102,0.18), var(--crm-shadow-inset);
+  box-shadow: 0 0 0 5px rgba(0, 102, 102, 0.16), var(--crm-shadow-panel-sm);
 }
 
-.force-ltr { direction: ltr; text-align: left; }
+.force-ltr { direction: ltr; text-align: left; unicode-bidi: plaintext; }
 
 .crm-shell-grid,
 .enterprise-grid-bg {
   background:
-    radial-gradient(circle at 8% 8%, rgba(0,102,102,0.12), transparent 22rem),
-    radial-gradient(circle at 90% 6%, rgba(254,153,0,0.11), transparent 18rem),
+    radial-gradient(circle at 9% 8%, rgba(0, 102, 102, 0.1), transparent 24rem),
+    radial-gradient(circle at 92% 8%, rgba(254, 153, 0, 0.08), transparent 18rem),
     var(--crm-surface);
 }
 
 .crm-table th, .crm-table td { text-align: start; }
+.crm-table thead th { background: rgba(241,242,245,0.72); }
 .crm-table tbody tr { transition: background-color 160ms ease, box-shadow 160ms ease, transform 160ms ease; }
-.crm-table tbody tr:hover { background: rgba(241,242,245,0.76); box-shadow: var(--crm-shadow-panel); }
+.crm-table tbody tr:hover { background: rgba(241,242,245,0.92); box-shadow: var(--crm-shadow-panel-sm); }
 
 .shell-sidebar {
-  background: var(--crm-surface);
+  background: linear-gradient(180deg, rgba(241,242,245,0.96), rgba(231,229,228,0.96));
   box-shadow: var(--crm-shadow-panel);
   border-inline-end: 1px solid rgba(30,41,56,0.08);
 }
-html[dir="rtl"] .shell-sidebar { border-right-width: 0; border-left-width: 1px; box-shadow: -8px 8px 18px rgba(174,171,170,0.44), 8px -8px 18px rgba(255,255,255,0.75); }
+html[dir="rtl"] .shell-sidebar { border-right-width: 0; border-left-width: 1px; box-shadow: -10px 10px 24px rgba(163,160,158,0.36), 10px -10px 24px rgba(255,255,255,0.75); }
 html[dir="rtl"] .drawer-panel { border-left-width: 0; border-right-width: 1px; }
 html[dir="rtl"] .drawer-root { justify-content: flex-start; }
 
@@ -112,17 +116,17 @@ html[dir="rtl"] .drawer-root { justify-content: flex-start; }
 .neu-pressed { background: var(--crm-surface); box-shadow: var(--crm-shadow-inset); }
 .neu-border { border: 1px solid rgba(30,41,56,0.1); }
 
-/* Token bridge for legacy Tailwind-heavy pages. The values follow the uploaded neumorphism skill tokens. */
+/* Neumorphism skill token bridge for legacy Tailwind-heavy pages. */
 .bg-slate-50, .bg-slate-100, .bg-slate-200 { background-color: var(--crm-surface) !important; }
 .bg-white, .bg-white\/90, .bg-white\/95 { background-color: var(--crm-panel) !important; }
 .bg-white\/5 { background-color: rgba(255,255,255,0.42) !important; }
 .bg-slate-900, .bg-slate-950, .bg-slate-950\/40 { background-color: var(--crm-primary) !important; }
 .bg-sky-50 { background-color: rgba(0,102,102,0.08) !important; }
 .bg-sky-600, .hover\:bg-sky-600:hover, .hover\:bg-sky-700:hover, .bg-sky-700 { background-color: var(--crm-primary) !important; }
-.bg-emerald-50 { background-color: var(--crm-success-50) !important; }
+.bg-emerald-50 { background-color: rgba(0,166,61,0.1) !important; }
 .bg-emerald-600, .hover\:bg-emerald-700:hover { background-color: var(--crm-success) !important; }
-.bg-amber-50 { background-color: var(--crm-warning-50) !important; }
-.bg-rose-50 { background-color: var(--crm-danger-50) !important; }
+.bg-amber-50 { background-color: rgba(254,153,0,0.12) !important; }
+.bg-rose-50 { background-color: rgba(255,33,87,0.1) !important; }
 .bg-rose-600, .hover\:bg-rose-700:hover { background-color: var(--crm-danger) !important; }
 
 .text-sky-300, .text-sky-600, .text-sky-700 { color: var(--crm-primary) !important; }
@@ -141,6 +145,6 @@ html[dir="rtl"] .drawer-root { justify-content: flex-start; }
 .border-rose-200, .border-rose-900 { border-color: rgba(255,33,87,0.34) !important; }
 
 .ring-sky-500, .focus\:ring-sky-500:focus, .focus-visible\:ring-sky-500:focus-visible { --tw-ring-color: var(--crm-focus) !important; }
-.shadow-sm, .shadow-xl { box-shadow: var(--crm-shadow-panel) !important; }
+.shadow-sm, .shadow-xl { box-shadow: var(--crm-shadow-panel-sm) !important; }
 .rounded-\[32px\], .rounded-\[28px\] { border-radius: var(--crm-radius-lg) !important; }
 .rounded-\[24px\], .rounded-2xl, .rounded-xl { border-radius: var(--crm-radius-md) !important; }

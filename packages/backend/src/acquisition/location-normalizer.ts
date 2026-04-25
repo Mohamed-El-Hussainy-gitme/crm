@@ -58,9 +58,31 @@ const GOOGLE_URL_PATTERN = /https?:\/\/[^\s"'<>]+/gi;
 const PHONE_LIKE_PATTERN = /(?:\+?20|0020|0)?1[0125][\s\d]{8,14}|\+?\d[\d\s().-]{7,18}/i;
 const PLUS_CODE_PATTERN = /\b[23456789CFGHJMPQRVWX]{4,}\+[23456789CFGHJMPQRVWX]{2,}(?:\s+[^\n,،]+)?\b/i;
 
+const SCRIPT_NOISE_PATTERN = /(window\.|document\.|function\s*\(|=>|\bconst\s+|\blet\s+|\bvar\s+|gtbExternal|tactiless|pageT\(|\.call\(this\)|querySelector|addEventListener|webpack|__NEXT_DATA__|<script|<style|javascript:|JSON\.stringify|localStorage|sessionStorage)/i;
+const HTML_TAG_PATTERN = /<[^>]+>/g;
+
+function stripScriptArtifacts(value: string): string {
+  return value
+    .replace(/<script[\s\S]*?<\/script>/gi, " ")
+    .replace(/<style[\s\S]*?<\/style>/gi, " ")
+    .replace(/\(function[\s\S]{0,800}?\)\(\);?/gi, " ")
+    .replace(/\(\(\)\s*=>\s*\{[\s\S]{0,1000}?\}\)\(\);?/gi, " ")
+    .replace(/\{?\(?[a-z]\s*=\s*window\.[^\n]{0,500}/gi, " ")
+    .replace(HTML_TAG_PATTERN, " ");
+}
+
+function looksLikeScriptNoise(value?: string | null): boolean {
+  const text = String(value ?? "").trim();
+  if (!text) return true;
+  if (SCRIPT_NOISE_PATTERN.test(text)) return true;
+  const punctuation = (text.match(/[{}()[\];=><]/g) ?? []).length;
+  const letters = (text.match(/[A-Za-z\u0600-\u06FF]/g) ?? []).length || 1;
+  return text.length > 80 && punctuation / letters > 0.22;
+}
+
 export function compactLocationText(value?: string | null): string | null {
-  const cleaned = value
-    ?.replace(/&amp;/g, "&")
+  const cleaned = stripScriptArtifacts(String(value ?? ""))
+    .replace(/&amp;/g, "&")
     .replace(/&quot;/g, '"')
     .replace(/&#39;/g, "'")
     .replace(/\u0026/g, "&")
@@ -133,6 +155,7 @@ function isOnlyCoordinateOrCode(line: string): boolean {
 function isNoiseLine(line: string): boolean {
   const value = line.trim();
   if (!value) return true;
+  if (looksLikeScriptNoise(value)) return true;
   if (/^https?:\/\//i.test(value)) return true;
   if (isOnlyCoordinateOrCode(value)) return true;
   if (/^(directions|save|nearby|send to phone|share|call|website|menu|reviews?|photos?|overview|about|updates|owner|suggest an edit|open|closed|opens|closes)$/i.test(value)) return true;
@@ -146,12 +169,14 @@ function isNoiseLine(line: string): boolean {
 
 function cleanAddressCandidate(value?: string | null): string | null {
   if (!value) return null;
+  if (looksLikeScriptNoise(value)) return null;
   const cleaned = compactLocationText(stripPlusCodes(stripCoordinates(stripUrls(value)))) ?? "";
-  if (!cleaned || isNoiseLine(cleaned)) return null;
+  if (!cleaned || isNoiseLine(cleaned) || looksLikeScriptNoise(cleaned)) return null;
   return cleaned.replace(/^[,،\s-]+|[,،\s-]+$/g, "").trim() || null;
 }
 
 function scoreAddressCandidate(line: string): number {
+  if (looksLikeScriptNoise(line)) return -100;
   let score = 0;
   if (ADDRESS_KEYWORDS.test(line)) score += 35;
   if (/[،,]/.test(line)) score += 25;

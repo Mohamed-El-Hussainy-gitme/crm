@@ -173,11 +173,11 @@ const quickOutcomes: Array<{ key: string; label: string; tone: Tone; helper: str
 ];
 
 const viewTabs: Array<{ key: ProspectingView; label: string; description: string }> = [
-  { key: "command", label: "Command", description: "Call queue and next action" },
-  { key: "capture", label: "Capture", description: "Save places from Google Maps" },
-  { key: "intake", label: "Maps intake", description: "Paste and import leads" },
-  { key: "enrichment", label: "Enrichment", description: "Missing phones and areas" },
-  { key: "scripts", label: "Scripts", description: "WhatsApp messages" },
+  { key: "command", label: "التشغيل", description: "قائمة الاتصال والخطوة القادمة" },
+  { key: "capture", label: "التقاط", description: "حفظ أماكن من Google Maps" },
+  { key: "intake", label: "إدخال الخرائط", description: "لصق ومراجعة العملاء" },
+  { key: "enrichment", label: "إكمال البيانات", description: "أرقام ومناطق ناقصة" },
+  { key: "scripts", label: "الرسائل", description: "قوالب واتساب" },
 ];
 
 function addDaysIso(days: number, hour = 12) {
@@ -314,7 +314,7 @@ function LeadCompactCard({
         </div>
         <div className="text-end">
           <p className="font-display text-3xl font-semibold text-enterprise-text">{contact.score}</p>
-          <p className="text-[0.65rem] font-bold uppercase tracking-[0.12em] text-enterprise-muted">score</p>
+          <p className="text-[0.65rem] font-bold uppercase tracking-[0.12em] text-enterprise-muted">الدرجة</p>
         </div>
       </div>
       <div className="mt-3 flex flex-wrap gap-2">
@@ -368,8 +368,8 @@ function ContactActionPanel({
 }) {
   if (!contact) {
     return (
-      <Card title="Lead command panel" description="Select a lead from the queue to see call actions, scripts, and next-step controls.">
-        <EmptyState title="No active lead" description="Import leads or select a campaign area with ready-to-call cafés." />
+      <Card title="لوحة العميل" description="اختر عميلًا من القائمة لعرض أزرار الاتصال والنصوص والخطوة القادمة.">
+        <EmptyState title="لا يوجد عميل محدد" description="أدخل بيانات مقاهٍ أو اختر منطقة تحتوي فرصًا جاهزة للاتصال." />
       </Card>
     );
   }
@@ -387,8 +387,8 @@ function ContactActionPanel({
 
   return (
     <Card
-      title="Lead command panel"
-      description="Use this panel during the call. Every outcome updates the CRM and creates the next action."
+      title="لوحة العميل"
+      description="استخدمها أثناء المكالمة. كل نتيجة تسجل حركة وتجهز الخطوة التالية."
       actions={<Badge tone={toneForAction(contact.recommendedAction)}>{contact.recommendedAction?.label ?? "Call now"}</Badge>}
       className="xl:sticky xl:top-24"
     >
@@ -396,36 +396,36 @@ function ContactActionPanel({
         <div className="rounded-xl border border-enterprise-primary/20 bg-enterprise-primary p-5 text-white">
           <div className="flex items-start justify-between gap-4">
             <div className="min-w-0">
-              <p className="text-xs font-bold uppercase tracking-[0.18em] text-enterprise-secondary">Active cafe</p>
+              <p className="text-xs font-bold uppercase tracking-[0.18em] text-enterprise-secondary">المقهى النشط</p>
               <h2 className="font-display mt-2 text-3xl font-semibold tracking-tight text-white">{contact.fullName}</h2>
               <p className="mt-2 text-sm leading-6 text-white/72">{contact.area || "Unassigned area"} · {contact.stage}</p>
             </div>
             <div className="rounded-lg border border-white/15 bg-white/10 px-4 py-3 text-center">
               <p className="font-display text-4xl font-semibold">{contact.score}</p>
-              <p className="text-[0.62rem] font-bold uppercase tracking-[0.14em] text-white/60">score</p>
+              <p className="text-[0.62rem] font-bold uppercase tracking-[0.14em] text-white/60">الدرجة</p>
             </div>
           </div>
           <div className="mt-5 grid gap-2 sm:grid-cols-3">
-            {contact.callUrl ? <a href={contact.callUrl} className={buttonStyles("primary", "sm", true)}>Call</a> : <span className={buttonStyles("ghost", "sm", true)}>No phone</span>}
-            {contact.whatsappUrl ? <a href={contact.whatsappUrl} target="_blank" rel="noreferrer" className={buttonStyles("secondary", "sm", true)}>WhatsApp</a> : null}
-            {contact.mapUrl ? <a href={contact.mapUrl} target="_blank" rel="noreferrer" className={buttonStyles("secondary", "sm", true)}>Maps</a> : null}
+            {contact.callUrl ? <a href={contact.callUrl} className={buttonStyles("primary", "sm", true)}>اتصال</a> : <span className={buttonStyles("ghost", "sm", true)}>لا يوجد رقم</span>}
+            {contact.whatsappUrl ? <a href={contact.whatsappUrl} target="_blank" rel="noreferrer" className={buttonStyles("secondary", "sm", true)}>واتساب</a> : null}
+            {contact.mapUrl ? <a href={contact.mapUrl} target="_blank" rel="noreferrer" className={buttonStyles("secondary", "sm", true)}>الخريطة</a> : null}
           </div>
         </div>
 
         <div className="grid gap-3 sm:grid-cols-2">
           <div className="rounded-xl border border-enterprise-border bg-enterprise-surface50 p-4">
-            <p className="text-xs font-bold uppercase tracking-[0.16em] text-enterprise-muted">Next task</p>
+            <p className="text-xs font-bold uppercase tracking-[0.16em] text-enterprise-muted">المهمة القادمة</p>
             <p className="mt-2 font-semibold text-enterprise-text">{contact.nextTaskDueAt ? formatDateTime(contact.nextTaskDueAt) : "No pending task"}</p>
           </div>
           <div className="rounded-xl border border-enterprise-border bg-enterprise-surface50 p-4">
-            <p className="text-xs font-bold uppercase tracking-[0.16em] text-enterprise-muted">Last touch</p>
+            <p className="text-xs font-bold uppercase tracking-[0.16em] text-enterprise-muted">آخر تواصل</p>
             <p className="mt-2 font-semibold text-enterprise-text">{contact.lastContactedAt ? formatDateTime(contact.lastContactedAt) : "Never contacted"}</p>
           </div>
         </div>
 
         {scoreParts.length ? (
           <div className="rounded-xl border border-enterprise-border bg-white p-4">
-            <p className="text-xs font-bold uppercase tracking-[0.16em] text-enterprise-muted">Why this priority</p>
+            <p className="text-xs font-bold uppercase tracking-[0.16em] text-enterprise-muted">سبب الأولوية</p>
             <div className="mt-3 grid gap-2 sm:grid-cols-5">
               {scoreParts.map(([label, value]) => (
                 <div key={label} className="rounded-lg bg-enterprise-surface50 px-3 py-2 text-center">
@@ -438,7 +438,7 @@ function ContactActionPanel({
         ) : null}
 
         <div>
-          <p className="mb-3 text-xs font-bold uppercase tracking-[0.16em] text-enterprise-muted">Call outcome</p>
+          <p className="mb-3 text-xs font-bold uppercase tracking-[0.16em] text-enterprise-muted">نتيجة المكالمة</p>
           <div className="grid gap-2 sm:grid-cols-2">
             {quickOutcomes.map((outcome) => (
               <button
@@ -458,10 +458,10 @@ function ContactActionPanel({
         </div>
 
         <div className="rounded-xl border border-enterprise-border bg-enterprise-surface50 p-4">
-          <p className="text-xs font-bold uppercase tracking-[0.16em] text-enterprise-muted">Suggested script</p>
+          <p className="text-xs font-bold uppercase tracking-[0.16em] text-enterprise-muted">نص مقترح</p>
           <p className="mt-3 text-sm leading-7 text-enterprise-text">{script?.body ?? "السلام عليكم، أنا محمد من Ahwa. ينفع أحدد مع المسؤول 10 دقايق أعرض السيستم؟"}</p>
           {script?.url || contact.whatsappUrl ? (
-            <a href={script?.url ?? contact.whatsappUrl ?? "#"} target="_blank" rel="noreferrer" className={`${buttonStyles("secondary", "sm")} mt-4`}>Open WhatsApp script</a>
+            <a href={script?.url ?? contact.whatsappUrl ?? "#"} target="_blank" rel="noreferrer" className={`${buttonStyles("secondary", "sm")} mt-4`}>فتح نص واتساب</a>
           ) : null}
         </div>
       </div>
@@ -659,15 +659,15 @@ export default function ProspectingPage() {
     <AppShell>
       <div className="space-y-6">
         <PageHeader
-          eyebrow="Ahwa acquisition"
-          title="Daily sales command center"
-          description="A backend-driven workflow for finding cafes, prioritizing calls, recording outcomes, and preparing the next action without paid Google Maps APIs."
+          eyebrow="ترويج Ahwa"
+          title="مساحة عمل الترويج اليومية"
+          description="التقط بيانات المقاهي، رتّب أولوية الاتصال، سجّل نتيجة المكالمة، واجعل المتابعة القادمة واضحة."
           actions={
             <div className="flex flex-wrap gap-3">
-              <Link href={"/pipeline" as Route} className={buttonStyles("secondary")}>Demo pipeline</Link>
-              <button type="button" className={buttonStyles("secondary")} onClick={() => setActiveView("capture")}>Capture assistant</button>
-              <button type="button" className={buttonStyles("secondary")} onClick={() => setActiveView("intake")}>Add Maps leads</button>
-              <button type="button" className={buttonStyles("primary")} onClick={() => setInput(sampleMapsText)}>Load sample intake</button>
+              <Link href={"/pipeline" as Route} className={buttonStyles("secondary")}>مسار العروض</Link>
+              <button type="button" className={buttonStyles("secondary")} onClick={() => setActiveView("capture")}>مساعد الالتقاط</button>
+              <button type="button" className={buttonStyles("secondary")} onClick={() => setActiveView("intake")}>إضافة من الخرائط</button>
+              <button type="button" className={buttonStyles("primary")} onClick={() => setInput(sampleMapsText)}>مثال تجريبي</button>
             </div>
           }
         />
@@ -678,37 +678,37 @@ export default function ProspectingPage() {
         <section className="overflow-hidden rounded-xl border border-enterprise-border bg-white shadow-panel">
           <div className="grid gap-0 xl:grid-cols-[1.15fr_0.85fr]">
             <div className="bg-enterprise-primary px-5 py-6 text-white md:px-6">
-              <p className="text-xs font-bold uppercase tracking-[0.2em] text-enterprise-secondary">Today operating plan</p>
+              <p className="text-xs font-bold uppercase tracking-[0.2em] text-enterprise-secondary">خطة اليوم</p>
               <div className="mt-4 grid gap-4 md:grid-cols-4">
                 <div className="md:col-span-2">
-                  <h2 className="font-display text-4xl font-semibold tracking-tight text-white">{plan?.targetCalls ?? 0} calls</h2>
-                  <p className="mt-2 max-w-2xl text-sm leading-6 text-white/72">{plan?.focus ?? "Load prospecting data to generate today's workflow."}</p>
+                  <h2 className="font-display text-4xl font-semibold tracking-tight text-white">{plan?.targetCalls ?? 0} مكالمة</h2>
+                  <p className="mt-2 max-w-2xl text-sm leading-6 text-white/72">{plan?.focus ?? "أضف بيانات مقاهٍ لتجهيز خطة اليوم."}</p>
                 </div>
                 <div className="rounded-xl border border-white/15 bg-white/10 p-4">
-                  <p className="text-xs font-bold uppercase tracking-[0.16em] text-white/55">Focus area</p>
-                  <p className="mt-2 font-display text-2xl font-semibold">{plan?.primaryArea ?? "No area"}</p>
+                  <p className="text-xs font-bold uppercase tracking-[0.16em] text-white/55">منطقة التركيز</p>
+                  <p className="mt-2 font-display text-2xl font-semibold">{plan?.primaryArea ?? "كل المناطق"}</p>
                 </div>
                 <div className="rounded-xl border border-white/15 bg-white/10 p-4">
-                  <p className="text-xs font-bold uppercase tracking-[0.16em] text-white/55">Ready now</p>
+                  <p className="text-xs font-bold uppercase tracking-[0.16em] text-white/55">جاهز الآن</p>
                   <p className="mt-2 font-display text-2xl font-semibold">{plan?.readyNow ?? 0}</p>
                 </div>
               </div>
             </div>
             <div className="grid grid-cols-2 gap-px bg-enterprise-border md:grid-cols-4 xl:grid-cols-2">
               <div className="bg-white p-5">
-                <p className="text-xs font-bold uppercase tracking-[0.16em] text-enterprise-muted">Overdue</p>
+                <p className="text-xs font-bold uppercase tracking-[0.16em] text-enterprise-muted">متأخر</p>
                 <p className="font-display mt-2 text-3xl font-semibold text-enterprise-text">{plan?.overdueFollowUps ?? 0}</p>
               </div>
               <div className="bg-white p-5">
-                <p className="text-xs font-bold uppercase tracking-[0.16em] text-enterprise-muted">Follow-ups</p>
+                <p className="text-xs font-bold uppercase tracking-[0.16em] text-enterprise-muted">متابعات</p>
                 <p className="font-display mt-2 text-3xl font-semibold text-enterprise-text">{plan?.dueFollowUps ?? 0}</p>
               </div>
               <div className="bg-white p-5">
-                <p className="text-xs font-bold uppercase tracking-[0.16em] text-enterprise-muted">Meetings</p>
+                <p className="text-xs font-bold uppercase tracking-[0.16em] text-enterprise-muted">مواعيد</p>
                 <p className="font-display mt-2 text-3xl font-semibold text-enterprise-text">{plan?.meetingsToday ?? 0}</p>
               </div>
               <div className="bg-white p-5">
-                <p className="text-xs font-bold uppercase tracking-[0.16em] text-enterprise-muted">Need data</p>
+                <p className="text-xs font-bold uppercase tracking-[0.16em] text-enterprise-muted">بيانات ناقصة</p>
                 <p className="font-display mt-2 text-3xl font-semibold text-enterprise-text">{plan?.needsEnrichment ?? 0}</p>
               </div>
             </div>
@@ -716,22 +716,22 @@ export default function ProspectingPage() {
         </section>
 
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
-          <StatCard label="Cafe leads" value={counts.totalCafeLeads} helper={selectedArea ? `Filtered by ${selectedArea}` : "Ahwa acquisition records"} />
-          <StatCard label="Ready to call" value={counts.readyToCall} helper="Has a usable phone" tone="emerald" />
-          <StatCard label="Needs phone" value={counts.needsPhone} helper="Imported but incomplete" tone="amber" />
-          <StatCard label="Contacted" value={counts.contacted} helper="At least one touch" tone="sky" />
-          <StatCard label="Meetings" value={counts.meetings} helper="Demo / visit stage" tone="emerald" />
+          <StatCard label="مقاهٍ مستهدفة" value={counts.totalCafeLeads} helper={selectedArea ? `مفلتر حسب ${selectedArea}` : "سجل ترويج Ahwa"} />
+          <StatCard label="جاهز للاتصال" value={counts.readyToCall} helper="لديه رقم صالح" tone="emerald" />
+          <StatCard label="يحتاج رقم" value={counts.needsPhone} helper="تم الإدخال لكن البيانات ناقصة" tone="amber" />
+          <StatCard label="تم التواصل" value={counts.contacted} helper="تمت محاولة التواصل" tone="sky" />
+          <StatCard label="مواعيد" value={counts.meetings} helper="مرحلة عرض أو زيارة" tone="emerald" />
         </div>
 
-        <Card title="Area campaigns" description="Choose a territory before starting calls. The command center will recalculate the queue for that area only.">
+        <Card title="حملات المناطق" description="اختر منطقة واحدة قبل بدء الاتصالات لتركيز القائمة عليها فقط.">
           <div className="flex gap-3 overflow-x-auto pb-1">
             <button
               type="button"
               onClick={() => setSelectedArea("")}
               className={`min-w-[11rem] rounded-xl border px-4 py-3 text-start transition ${!selectedArea ? "border-enterprise-secondary bg-enterprise-secondary text-white shadow-panel" : "border-enterprise-border bg-white hover:border-enterprise-primary"}`}
             >
-              <p className="font-semibold">All areas</p>
-              <p className={`mt-1 text-xs ${!selectedArea ? "text-white/75" : "text-enterprise-muted"}`}>{overview?.globalCounts?.totalCafeLeads ?? counts.totalCafeLeads} total leads</p>
+              <p className="font-semibold">كل المناطق</p>
+              <p className={`mt-1 text-xs ${!selectedArea ? "text-white/75" : "text-enterprise-muted"}`}>{overview?.globalCounts?.totalCafeLeads ?? counts.totalCafeLeads} عميل محتمل</p>
             </button>
             {(overview?.areaCampaigns ?? []).slice(0, 14).map((area) => (
               <AreaChip key={area.area} area={area} active={selectedArea === area.area} onClick={() => setSelectedArea(area.area)} />
@@ -758,20 +758,20 @@ export default function ProspectingPage() {
         {activeView === "command" ? (
           <div className="grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
             <div className="space-y-6">
-              <Card title="Today call queue" description="Sorted by urgency, score, due follow-up, and campaign readiness.">
-                {loading ? <p className="text-sm text-enterprise-muted">Loading call queue...</p> : overview?.callQueue.length ? (
+              <Card title="قائمة اتصال اليوم" description="مرتبة حسب الاستعجال، الدرجة، المتابعة المستحقة، وجاهزية البيانات.">
+                {loading ? <p className="text-sm text-enterprise-muted">جارٍ تحميل قائمة الاتصال...</p> : overview?.callQueue.length ? (
                   <div className="space-y-3">
                     {overview.callQueue.map((contact) => (
                       <LeadCompactCard key={contact.id} contact={contact} selected={selectedContact?.id === contact.id} onSelect={() => setSelectedContactId(contact.id)} />
                     ))}
                   </div>
                 ) : (
-                  <EmptyState title="No ready leads" description="Import Google Maps leads or enrich phone numbers before starting today's call block." action={<button type="button" onClick={() => setActiveView("intake")} className={buttonStyles("primary")}>Add leads</button>} />
+                  <EmptyState title="لا توجد فرص جاهزة" description="أضف بيانات من Google Maps أو أكمل الأرقام الناقصة قبل بدء المكالمات." action={<button type="button" onClick={() => setActiveView("intake")} className={buttonStyles("primary")}>إضافة فرص</button>} />
                 )}
               </Card>
 
               {overview?.followUpDue?.length ? (
-                <Card title="Due follow-ups" description="These leads have an overdue or today task. Handle them before cold calls.">
+                <Card title="متابعات مستحقة" description="ابدأ بهذه المتابعات قبل المكالمات الجديدة.">
                   <div className="grid gap-3 md:grid-cols-2">
                     {overview.followUpDue.slice(0, 8).map((contact) => (
                       <LeadCompactCard key={contact.id} contact={contact} selected={selectedContact?.id === contact.id} onSelect={() => setSelectedContactId(contact.id)} />
@@ -788,34 +788,34 @@ export default function ProspectingPage() {
         {activeView === "capture" ? (
           <div className="grid gap-6 xl:grid-cols-[0.85fr_1.15fr]">
             <div className="space-y-6">
-              <Card title="Google Maps Capture Assistant" description="Use this when a cafe page is open in Google Maps. It reads visible page text in your browser and sends a review payload to this CRM. No Google API key is required.">
+              <Card title="مساعد التقاط Google Maps" description="افتح صفحة المقهى في Google Maps، التقط البيانات الظاهرة، ثم راجعها قبل الإدخال.">
                 <div className="space-y-5">
                   <div className="rounded-xl border border-enterprise-border bg-enterprise-surface50 p-4">
-                    <p className="text-sm font-semibold text-enterprise-text">1. Drag this button to your bookmarks bar</p>
-                    <p className="mt-1 text-xs leading-5 text-enterprise-muted">Then open any Google Maps cafe page and click the bookmark. The CRM will open with a captured lead ready for review.</p>
+                    <p className="text-sm font-semibold text-enterprise-text">١. اسحب الزر إلى شريط المفضلة</p>
+                    <p className="mt-1 text-xs leading-5 text-enterprise-muted">افتح أي مقهى في Google Maps ثم اضغط الزر. سيفتح الـ CRM والبيانات جاهزة للمراجعة.</p>
                     <div className="mt-4 flex flex-wrap gap-3">
-                      <a href={bookmarkletHref} className={buttonStyles("primary")} onClick={(event) => { if (!captureOrigin) event.preventDefault(); }}>Save to CRM</a>
-                      <button type="button" className={buttonStyles("secondary")} onClick={() => navigator.clipboard?.writeText(bookmarkletHref)}>Copy bookmarklet</button>
+                      <a href={bookmarkletHref} className={buttonStyles("primary")} onClick={(event) => { if (!captureOrigin) event.preventDefault(); }}>حفظ في CRM</a>
+                      <button type="button" className={buttonStyles("secondary")} onClick={() => navigator.clipboard?.writeText(bookmarkletHref)}>نسخ الزر</button>
                     </div>
                   </div>
 
                   <div className="rounded-xl border border-enterprise-border bg-white p-4">
-                    <p className="text-sm font-semibold text-enterprise-text">2. Manual fallback</p>
-                    <p className="mt-1 text-xs leading-5 text-enterprise-muted">If bookmarklets are blocked, paste copied Google Maps text, a Maps URL, or the JSON payload here.</p>
-                    <Textarea value={captureJson} onChange={(event) => setCaptureJson(event.target.value)} placeholder="Paste Google Maps visible text, a maps.app.goo.gl link, or captured JSON..." className="mt-3 min-h-44 font-mono text-xs" />
+                    <p className="text-sm font-semibold text-enterprise-text">٢. إدخال يدوي عند الحاجة</p>
+                    <p className="mt-1 text-xs leading-5 text-enterprise-muted">إذا لم يعمل زر المفضلة، الصق نص Google Maps أو رابط المكان هنا.</p>
+                    <Textarea value={captureJson} onChange={(event) => setCaptureJson(event.target.value)} placeholder="الصق نص المكان من Google Maps أو رابط maps.app.goo.gl أو بيانات الالتقاط..." className="mt-3 min-h-44 font-mono text-xs" />
                     <div className="mt-4 flex flex-wrap gap-3">
-                      <button type="button" className={buttonStyles("primary")} disabled={capturing || captureJson.trim().length < 3} onClick={() => void capturePayload()}>{capturing ? "Capturing..." : "Capture lead"}</button>
-                      <button type="button" className={buttonStyles("ghost")} onClick={() => setCaptureJson("")}>Clear</button>
+                      <button type="button" className={buttonStyles("primary")} disabled={capturing || captureJson.trim().length < 3} onClick={() => void capturePayload()}>{capturing ? "جارٍ الالتقاط..." : "التقاط العميل"}</button>
+                      <button type="button" className={buttonStyles("ghost")} onClick={() => setCaptureJson("")}>مسح</button>
                     </div>
                   </div>
 
                   <div className="rounded-xl border border-enterprise-border bg-enterprise-primary p-4 text-white">
-                    <p className="text-xs font-bold uppercase tracking-[0.18em] text-enterprise-secondary">Workflow</p>
+                    <p className="text-xs font-bold uppercase tracking-[0.18em] text-enterprise-secondary">طريقة العمل</p>
                     <ol className="mt-3 list-decimal space-y-2 ps-5 text-sm leading-6 text-white/75">
-                      <li>Search cafes in Google Maps by area.</li>
-                      <li>Open a place profile and click Save to CRM.</li>
-                      <li>Review duplicate warnings, phone, area, and address.</li>
-                      <li>Import selected leads into the call queue.</li>
+                      <li>ابحث عن المقاهي في Google Maps حسب المنطقة.</li>
+                      <li>افتح صفحة المكان واضغط حفظ في CRM.</li>
+                      <li>راجع التكرارات والرقم والمنطقة والعنوان.</li>
+                      <li>أدخل العملاء المحددين إلى قائمة الاتصال.</li>
                     </ol>
                   </div>
                 </div>
@@ -823,9 +823,9 @@ export default function ProspectingPage() {
             </div>
 
             <Card
-              title="Capture review queue"
-              description="Captured places are not inserted until you approve them. Possible duplicates are shown before import."
-              actions={parsedLeads.length ? <button type="button" disabled={!selectedParsedLeads.length || importing} onClick={() => void importSelected()} className={buttonStyles("primary")}>{importing ? "Importing..." : `Import selected (${selectedParsedLeads.length})`}</button> : null}
+              title="قائمة مراجعة الالتقاط"
+              description="لا يتم إدخال الأماكن الملتقطة إلا بعد موافقتك. تظهر التكرارات المحتملة قبل الإدخال."
+              actions={parsedLeads.length ? <button type="button" disabled={!selectedParsedLeads.length || importing} onClick={() => void importSelected()} className={buttonStyles("primary")}>{importing ? "جارٍ الإدخال..." : `إدخال المحدد (${selectedParsedLeads.length})`}</button> : null}
             >
               {parsedLeads.length ? (
                 <div className="space-y-3">
@@ -847,28 +847,28 @@ export default function ProspectingPage() {
                           <div className="flex flex-wrap gap-2">
                             <Badge tone={toneForConfidence(lead.confidence)}>{lead.confidence}</Badge>
                             <Badge tone="sky">{lead.score}/100</Badge>
-                            <Badge tone={duplicateTone(duplicateCount)}>{duplicateCount ? `${duplicateCount} duplicate risk` : "new lead"}</Badge>
+                            <Badge tone={duplicateTone(duplicateCount)}>{duplicateCount ? `${duplicateCount} خطر تكرار` : "عميل جديد"}</Badge>
                           </div>
                         </div>
                         <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
-                          <FieldShell label="Cafe name"><Input value={lead.name} onChange={(event) => updateLead(lead.id, { name: event.target.value })} /></FieldShell>
-                          <FieldShell label="Phone"><Input value={lead.phone ?? ""} onChange={(event) => updateLead(lead.id, { phone: event.target.value || null })} placeholder="010..." /></FieldShell>
-                          <FieldShell label="Area"><Input value={lead.area ?? ""} onChange={(event) => updateLead(lead.id, { area: event.target.value || null })} /></FieldShell>
-                          <FieldShell label="City"><Input value={lead.city ?? ""} onChange={(event) => updateLead(lead.id, { city: event.target.value || null })} placeholder="القاهرة / الجيزة" /></FieldShell>
-                          <FieldShell label="Source"><Input value={lead.source} onChange={(event) => updateLead(lead.id, { source: event.target.value })} /></FieldShell>
-                          <FieldShell label="Coordinates"><Input value={lead.coordinates ?? ""} onChange={(event) => updateLead(lead.id, { coordinates: event.target.value || null })} placeholder="30.000000, 31.000000" className="force-ltr" dir="ltr" /></FieldShell>
-                          <div className="md:col-span-2"><FieldShell label="Readable address"><Input value={lead.address ?? ""} onChange={(event) => updateLead(lead.id, { address: event.target.value || null })} placeholder="شارع المساحة، الدقي، الجيزة" /></FieldShell></div>
-                          <div className="md:col-span-2"><FieldShell label="Maps URL"><Input value={lead.mapUrl ?? ""} onChange={(event) => updateLead(lead.id, { mapUrl: event.target.value || null })} className="force-ltr" dir="ltr" /></FieldShell></div>
+                          <FieldShell label="اسم المقهى"><Input value={lead.name} onChange={(event) => updateLead(lead.id, { name: event.target.value })} /></FieldShell>
+                          <FieldShell label="الهاتف"><Input value={lead.phone ?? ""} onChange={(event) => updateLead(lead.id, { phone: event.target.value || null })} placeholder="010..." /></FieldShell>
+                          <FieldShell label="المنطقة"><Input value={lead.area ?? ""} onChange={(event) => updateLead(lead.id, { area: event.target.value || null })} /></FieldShell>
+                          <FieldShell label="المدينة"><Input value={lead.city ?? ""} onChange={(event) => updateLead(lead.id, { city: event.target.value || null })} placeholder="القاهرة / الجيزة" /></FieldShell>
+                          <FieldShell label="المصدر"><Input value={lead.source} onChange={(event) => updateLead(lead.id, { source: event.target.value })} /></FieldShell>
+                          <FieldShell label="الإحداثيات"><Input value={lead.coordinates ?? ""} onChange={(event) => updateLead(lead.id, { coordinates: event.target.value || null })} placeholder="30.000000, 31.000000" className="force-ltr" dir="ltr" /></FieldShell>
+                          <div className="md:col-span-2"><FieldShell label="العنوان المقروء"><Input value={lead.address ?? ""} onChange={(event) => updateLead(lead.id, { address: event.target.value || null })} placeholder="شارع المساحة، الدقي، الجيزة" /></FieldShell></div>
+                          <div className="md:col-span-2"><FieldShell label="رابط الخريطة"><Input value={lead.mapUrl ?? ""} onChange={(event) => updateLead(lead.id, { mapUrl: event.target.value || null })} className="force-ltr" dir="ltr" /></FieldShell></div>
                         </div>
                         {duplicateCount ? (
                           <div className="mt-4 rounded-lg border border-enterprise-warning/30 bg-white p-3">
-                            <p className="text-xs font-bold uppercase tracking-[0.16em] text-enterprise-warning">Possible duplicates</p>
+                            <p className="text-xs font-bold uppercase tracking-[0.16em] text-enterprise-warning">تكرارات محتملة</p>
                             <div className="mt-2 space-y-2">
                               {lead.duplicateCandidates?.map((candidate) => (
                                 <div key={candidate.id} className="flex flex-wrap items-center justify-between gap-3 rounded-md bg-enterprise-surface50 px-3 py-2 text-xs">
-                                  <span className="font-semibold text-enterprise-text">{candidate.fullName} · {candidate.area || "No area"}</span>
+                                  <span className="font-semibold text-enterprise-text">{candidate.fullName} · {candidate.area || "كل المناطق"}</span>
                                   <span className="text-enterprise-muted">{candidate.reason} · {candidate.score}%</span>
-                                  <Link href={`/contacts/view?id=${candidate.id}` as Route} className="font-semibold text-enterprise-primary">Open</Link>
+                                  <Link href={`/contacts/view?id=${candidate.id}` as Route} className="font-semibold text-enterprise-primary">فتح</Link>
                                 </div>
                               ))}
                             </div>
@@ -880,7 +880,7 @@ export default function ProspectingPage() {
                   })}
                 </div>
               ) : (
-                <EmptyState title="No captured places yet" description="Use the Save to CRM bookmarklet on Google Maps, or paste a Maps payload in the assistant." />
+                <EmptyState title="لا توجد أماكن ملتقطة" description="استخدم زر حفظ في CRM من Google Maps أو الصق نص المكان هنا." />
               )}
             </Card>
           </div>
@@ -888,25 +888,25 @@ export default function ProspectingPage() {
 
         {activeView === "intake" ? (
           <div className="grid gap-6 xl:grid-cols-[0.9fr_1.1fr]">
-            <Card title="Google Maps intake" description="Paste one or many Google Maps cards. The backend extracts cafe name, phone, area, address, and map URL using deterministic heuristics only.">
+            <Card title="إدخال من Google Maps" description="الصق بطاقة أو عدة بطاقات من Google Maps لاستخراج الاسم والرقم والمنطقة والعنوان والرابط.">
               <div className="space-y-4">
-                <FieldShell label="Target area" hint="Optional. Used when copied Maps text does not contain a clear district.">
-                  <Input value={defaultArea} onChange={(event) => setDefaultArea(event.target.value)} placeholder="Nasr City, Maadi, Dokki..." />
+                <FieldShell label="المنطقة المستهدفة" hint="اختياري. يستخدم عندما لا يحتوي النص المنسوخ على منطقة واضحة.">
+                  <Input value={defaultArea} onChange={(event) => setDefaultArea(event.target.value)} placeholder="الدقي، المعادي، مدينة نصر..." />
                 </FieldShell>
-                <FieldShell label="Google Maps cards or links">
-                  <Textarea value={input} onChange={(event) => setInput(event.target.value)} placeholder="Paste copied Google Maps results here..." className="min-h-72 font-mono text-xs" />
+                <FieldShell label="بطاقات أو روابط Google Maps">
+                  <Textarea value={input} onChange={(event) => setInput(event.target.value)} placeholder="الصق نتائج Google Maps المنسوخة هنا..." className="min-h-72 font-mono text-xs" />
                 </FieldShell>
                 <div className="flex flex-wrap gap-3">
-                  <button type="button" onClick={() => void parseInput()} disabled={parsing || input.trim().length < 3} className={buttonStyles("primary")}>{parsing ? "Parsing..." : "Parse leads"}</button>
-                  <button type="button" onClick={() => { setInput(""); setParsedLeads([]); setSelectedLeadIds([]); }} className={buttonStyles("ghost")}>Clear</button>
+                  <button type="button" onClick={() => void parseInput()} disabled={parsing || input.trim().length < 3} className={buttonStyles("primary")}>{parsing ? "جارٍ التحليل..." : "تحليل العملاء"}</button>
+                  <button type="button" onClick={() => { setInput(""); setParsedLeads([]); setSelectedLeadIds([]); }} className={buttonStyles("ghost")}>مسح</button>
                 </div>
               </div>
             </Card>
 
             <Card
-              title="Review import queue"
-              description="Import only selected leads. Missing-phone leads are kept as enrichment tasks, not discarded."
-              actions={parsedLeads.length ? <button type="button" disabled={!selectedParsedLeads.length || importing} onClick={() => void importSelected()} className={buttonStyles("primary")}>{importing ? "Importing..." : `Import selected (${selectedParsedLeads.length})`}</button> : null}
+              title="مراجعة الإدخال"
+              description="أدخل العناصر المحددة فقط. العناصر بلا رقم تبقى في قائمة الإكمال."
+              actions={parsedLeads.length ? <button type="button" disabled={!selectedParsedLeads.length || importing} onClick={() => void importSelected()} className={buttonStyles("primary")}>{importing ? "جارٍ الإدخال..." : `إدخال المحدد (${selectedParsedLeads.length})`}</button> : null}
             >
               {parsedLeads.length ? (
                 <div className="space-y-3">
@@ -930,14 +930,14 @@ export default function ProspectingPage() {
                           </div>
                         </div>
                         <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
-                          <FieldShell label="Name"><Input value={lead.name} onChange={(event) => updateLead(lead.id, { name: event.target.value })} /></FieldShell>
-                          <FieldShell label="Phone"><Input value={lead.phone ?? ""} onChange={(event) => updateLead(lead.id, { phone: event.target.value || null })} placeholder="010..." /></FieldShell>
-                          <FieldShell label="Area"><Input value={lead.area ?? ""} onChange={(event) => updateLead(lead.id, { area: event.target.value || null })} /></FieldShell>
-                          <FieldShell label="City"><Input value={lead.city ?? ""} onChange={(event) => updateLead(lead.id, { city: event.target.value || null })} placeholder="القاهرة / الجيزة" /></FieldShell>
-                          <FieldShell label="Source"><Input value={lead.source} onChange={(event) => updateLead(lead.id, { source: event.target.value })} /></FieldShell>
-                          <FieldShell label="Coordinates"><Input value={lead.coordinates ?? ""} onChange={(event) => updateLead(lead.id, { coordinates: event.target.value || null })} placeholder="30.000000, 31.000000" className="force-ltr" dir="ltr" /></FieldShell>
-                          <div className="md:col-span-2"><FieldShell label="Readable address"><Input value={lead.address ?? ""} onChange={(event) => updateLead(lead.id, { address: event.target.value || null })} placeholder="شارع المساحة، الدقي، الجيزة" /></FieldShell></div>
-                          <div className="md:col-span-2"><FieldShell label="Maps URL"><Input value={lead.mapUrl ?? ""} onChange={(event) => updateLead(lead.id, { mapUrl: event.target.value || null })} className="force-ltr" dir="ltr" /></FieldShell></div>
+                          <FieldShell label="الاسم"><Input value={lead.name} onChange={(event) => updateLead(lead.id, { name: event.target.value })} /></FieldShell>
+                          <FieldShell label="الهاتف"><Input value={lead.phone ?? ""} onChange={(event) => updateLead(lead.id, { phone: event.target.value || null })} placeholder="010..." /></FieldShell>
+                          <FieldShell label="المنطقة"><Input value={lead.area ?? ""} onChange={(event) => updateLead(lead.id, { area: event.target.value || null })} /></FieldShell>
+                          <FieldShell label="المدينة"><Input value={lead.city ?? ""} onChange={(event) => updateLead(lead.id, { city: event.target.value || null })} placeholder="القاهرة / الجيزة" /></FieldShell>
+                          <FieldShell label="المصدر"><Input value={lead.source} onChange={(event) => updateLead(lead.id, { source: event.target.value })} /></FieldShell>
+                          <FieldShell label="الإحداثيات"><Input value={lead.coordinates ?? ""} onChange={(event) => updateLead(lead.id, { coordinates: event.target.value || null })} placeholder="30.000000, 31.000000" className="force-ltr" dir="ltr" /></FieldShell>
+                          <div className="md:col-span-2"><FieldShell label="العنوان المقروء"><Input value={lead.address ?? ""} onChange={(event) => updateLead(lead.id, { address: event.target.value || null })} placeholder="شارع المساحة، الدقي، الجيزة" /></FieldShell></div>
+                          <div className="md:col-span-2"><FieldShell label="رابط الخريطة"><Input value={lead.mapUrl ?? ""} onChange={(event) => updateLead(lead.id, { mapUrl: event.target.value || null })} className="force-ltr" dir="ltr" /></FieldShell></div>
                         </div>
                         {lead.warnings.length ? <p className="mt-3 text-xs font-semibold text-enterprise-warning">{lead.warnings.join(" · ")}</p> : null}
                       </div>
@@ -945,7 +945,7 @@ export default function ProspectingPage() {
                   })}
                 </div>
               ) : (
-                <EmptyState title="No parsed leads" description="Paste Google Maps cards, parse them, then review before import." />
+                <EmptyState title="لا توجد نتائج بعد" description="الصق بطاقات Google Maps، حللها، ثم راجعها قبل الإدخال." />
               )}
             </Card>
           </div>
@@ -953,7 +953,7 @@ export default function ProspectingPage() {
 
         {activeView === "enrichment" ? (
           <div className="grid gap-6 xl:grid-cols-[1fr_1fr]">
-            <Card title="Needs enrichment" description="These cafes are useful for territory coverage but need a phone number before calling.">
+            <Card title="بيانات تحتاج إكمال" description="مقاهٍ مفيدة لكنها تحتاج رقمًا أو منطقة أو عنوانًا أوضح قبل الاتصال.">
               {overview?.needsPhone.length ? (
                 <div className="space-y-3">
                   {overview.needsPhone.map((contact) => (
@@ -961,10 +961,10 @@ export default function ProspectingPage() {
                   ))}
                 </div>
               ) : (
-                <EmptyState title="No enrichment backlog" description="All imported Ahwa leads in this view have usable phone numbers." />
+                <EmptyState title="لا توجد بيانات ناقصة" description="كل المقاهي المستوردة في هذه القائمة لديها أرقام قابلة للاستخدام." />
               )}
             </Card>
-            <Card title="Campaign coverage" description="Use this to decide whether to import more leads, call, or enrich data per territory.">
+            <Card title="تغطية المناطق" description="استخدمها لتحديد هل تحتاج إدخال مقاهٍ أكثر، الاتصال، أو إكمال البيانات لكل منطقة.">
               {overview?.areaCampaigns.length ? (
                 <div className="space-y-3">
                   {overview.areaCampaigns.map((area) => (
@@ -983,7 +983,7 @@ export default function ProspectingPage() {
                   ))}
                 </div>
               ) : (
-                <EmptyState title="No area campaigns yet" description="Import cafe leads with area data to generate campaigns." />
+                <EmptyState title="لا توجد حملات مناطق بعد" description="أدخل مقاهي تحتوي على منطقة حتى تظهر الحملات." />
               )}
             </Card>
           </div>
@@ -992,11 +992,11 @@ export default function ProspectingPage() {
         {activeView === "scripts" ? (
           <div className="grid gap-6 lg:grid-cols-2">
             {(overview?.templates ?? []).map((template) => (
-              <Card key={template.key} title={template.title} description="Manual WhatsApp template. No paid API required.">
+              <Card key={template.key} title={template.title} description="قالب واتساب يدوي بدون API مدفوع.">
                 <p className="min-h-28 rounded-xl border border-enterprise-border bg-enterprise-surface50 p-4 text-sm leading-7 text-enterprise-text">{template.body}</p>
                 <div className="mt-4 flex flex-wrap gap-3">
-                  {template.url ? <a href={template.url} target="_blank" rel="noreferrer" className={buttonStyles("primary")}>Open WhatsApp</a> : null}
-                  <button type="button" onClick={() => navigator.clipboard?.writeText(template.body)} className={buttonStyles("secondary")}>Copy text</button>
+                  {template.url ? <a href={template.url} target="_blank" rel="noreferrer" className={buttonStyles("primary")}>فتح واتساب</a> : null}
+                  <button type="button" onClick={() => navigator.clipboard?.writeText(template.body)} className={buttonStyles("secondary")}>نسخ النص</button>
                 </div>
               </Card>
             ))}
@@ -1004,7 +1004,7 @@ export default function ProspectingPage() {
         ) : null}
 
         {importResults.length ? (
-          <Card title="Last import result" description="Created leads are immediately available in the command queue.">
+          <Card title="آخر نتيجة إدخال" description="العملاء الذين تم إنشاؤهم يظهرون مباشرة في قائمة الاتصال.">
             <div className="space-y-2">
               {importResults.map((result, index) => (
                 <div key={`${result.name}-${index}`} className="flex items-center justify-between gap-3 rounded-lg border border-enterprise-border bg-enterprise-surface50 px-4 py-3 text-sm">
