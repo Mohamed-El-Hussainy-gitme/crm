@@ -10,6 +10,8 @@ import { CoreRepository } from "../core/repository.js";
 import type { ContactRow, TaskPriority, TaskType } from "../core/types.js";
 import { addDays, createId, normalizePhone, nowIso, optionalText, requireMinimumRole, splitTags, uniqueTags } from "../core/utils.js";
 
+type LeadPriority = "HIGH" | "MEDIUM" | "LOW";
+
 type ParsedCafeLead = {
   id: string;
   name: string;
@@ -183,10 +185,79 @@ function parseLeadChunk(chunk: string, defaultArea?: string, defaultSource = "Go
   };
 }
 
-function serializeProspectingContact(contact: ContactRow) {
+function daysSince(iso?: string | null): number | null {
+  if (!iso) return null;
+  const parsed = new Date(iso).getTime();
+  if (!Number.isFinite(parsed)) return null;
+  return Math.max(0, Math.floor((Date.now() - parsed) / 86_400_000));
+}
+
+function startOfDay(value: Date): Date {
+  const date = new Date(value);
+  date.setHours(0, 0, 0, 0);
+  return date;
+}
+
+function endOfDay(value: Date): Date {
+  const date = new Date(value);
+  date.setHours(23, 59, 59, 999);
+  return date;
+}
+
+function isIsoWithinDay(value: string | null | undefined, day = new Date()): boolean {
+  if (!value) return false;
+  const timestamp = new Date(value).getTime();
+  return Number.isFinite(timestamp) && timestamp >= startOfDay(day).getTime() && timestamp <= endOfDay(day).getTime();
+}
+
+function isIsoOverdue(value: string | null | undefined): boolean {
+  if (!value) return false;
+  const timestamp = new Date(value).getTime();
+  return Number.isFinite(timestamp) && timestamp < Date.now();
+}
+
+type ContactTaskMeta = {
+  pendingTasks?: number;
+  dueToday?: boolean;
+  overdue?: boolean;
+  meetingToday?: boolean;
+  nextTaskDueAt?: string | null;
+};
+
+function leadScoreBreakdown(contact: ContactRow, meta: ContactTaskMeta = {}) {
+  const hasPhone = isRealPhone(contact.phone);
+  const recencyDays = daysSince(contact.lastContactedAt);
+  const phone = hasPhone ? 30 : 0;
+  const map = contact.mapUrl ? 15 : 0;
+  const area = contact.area ? 15 : 0;
+  const freshness = recencyDays === null ? 15 : recencyDays >= 3 ? 10 : 0;
+  const dueFollowUp = meta.overdue ? 20 : meta.dueToday ? 15 : 0;
+  const stageScore = contact.stage === "INTERESTED" || contact.stage === "POTENTIAL" ? 15 : contact.stage === "VISIT" || contact.stage === "FREE_TRIAL" ? 10 : contact.stage === "LEAD" ? 8 : 0;
+  const penalty = contact.stage === "LOST" ? -45 : contact.stage === "CLIENT" ? -60 : 0;
+  const total = Math.max(0, Math.min(100, 10 + phone + map + area + freshness + dueFollowUp + stageScore + penalty));
+  return { total, phone, map, area, freshness, dueFollowUp, stage: stageScore, penalty };
+}
+
+function priorityFromScore(score: number): LeadPriority {
+  if (score >= 75) return "HIGH";
+  if (score >= 50) return "MEDIUM";
+  return "LOW";
+}
+
+function recommendedAction(contact: ContactRow, meta: ContactTaskMeta = {}) {
+  if (!isRealPhone(contact.phone)) return { key: "ENRICH_PHONE", label: "Find phone", urgency: "MEDIUM" };
+  if (meta.meetingToday || contact.stage === "VISIT") return { key: "PREPARE_DEMO", label: "Prepare demo", urgency: "HIGH" };
+  if (meta.overdue) return { key: "CALL_OVERDUE", label: "Overdue follow-up", urgency: "HIGH" };
+  if (meta.dueToday || isIsoWithinDay(contact.nextFollowUpAt)) return { key: "FOLLOW_UP", label: "Follow up today", urgency: "HIGH" };
+  if (contact.stage === "INTERESTED" || contact.stage === "POTENTIAL") return { key: "SEND_WHATSAPP", label: "Send WhatsApp", urgency: "MEDIUM" };
+  return { key: "CALL_NOW", label: "Call now", urgency: "MEDIUM" };
+}
+
+function serializeProspectingContact(contact: ContactRow, meta: ContactTaskMeta = {}) {
   const hasPhone = isRealPhone(contact.phone);
   const tags = splitTags(contact.tags);
-  const score = scoreLead({ name: contact.fullName, phone: contact.phone, area: contact.area, mapUrl: contact.mapUrl, address: contact.locationText });
+  const breakdown = leadScoreBreakdown(contact, meta);
+  const score = breakdown.total;
   const intro = `السلام عليكم، أنا محمد من Ahwa. عندنا سيستم تشغيل للمقاهي بيساعد في الطلبات والكاشير والمطبخ والحسابات. ينفع أحدد مع المسؤول 10 دقايق أعرض الفكرة؟`;
   return {
     id: contact.id,
@@ -204,7 +275,11 @@ function serializeProspectingContact(contact: ContactRow) {
     nextFollowUpAt: contact.nextFollowUpAt,
     tags,
     score,
-    priority: score >= 75 ? "HIGH" : score >= 50 ? "MEDIUM" : "LOW",
+    scoreBreakdown: breakdown,
+    priority: priorityFromScore(score),
+    recommendedAction: recommendedAction(contact, meta),
+    pendingTasks: meta.pendingTasks ?? 0,
+    nextTaskDueAt: meta.nextTaskDueAt ?? null,
     callUrl: hasPhone ? `tel:${contact.phone}` : null,
     whatsappUrl: hasPhone ? buildWhatsappUrl(contact.phone, intro) : null,
   };
@@ -261,27 +336,48 @@ export async function handleAcquisitionRoute(request: Request, env: BackendEnv, 
   const repo = new CoreRepository(env);
 
   if (pathSegments.length === 2 && pathSegments[1] === "overview" && method === "GET") {
+    const url = new URL(request.url);
+    const selectedArea = (url.searchParams.get("area") ?? "").trim();
     const [contacts, tasks] = await Promise.all([
-      repo.contacts([], [{ column: "updatedAt", ascending: false }], 1500),
-      repo.tasks([{ column: "status", value: "PENDING" }], [{ column: "dueAt", ascending: true }], 500),
+      repo.contacts([], [{ column: "updatedAt", ascending: false }], 2500),
+      repo.tasks([{ column: "status", value: "PENDING" }], [{ column: "dueAt", ascending: true }], 1000),
     ]);
+
     const cafeContacts = contacts.filter(contactMatchesCafeProspecting);
-    const taskByContact = new Map<string, number>();
+    const visibleContacts = selectedArea && selectedArea !== "ALL" ? cafeContacts.filter((contact) => (contact.area || "Unassigned area") === selectedArea) : cafeContacts;
+
+    const taskMetaByContact = new Map<string, ContactTaskMeta>();
     for (const task of tasks) {
-      if (task.contactId) taskByContact.set(task.contactId, (taskByContact.get(task.contactId) ?? 0) + 1);
+      if (!task.contactId) continue;
+      const current = taskMetaByContact.get(task.contactId) ?? { pendingTasks: 0, dueToday: false, overdue: false, meetingToday: false, nextTaskDueAt: null };
+      current.pendingTasks = (current.pendingTasks ?? 0) + 1;
+      current.dueToday = Boolean(current.dueToday || isIsoWithinDay(task.dueAt));
+      current.overdue = Boolean(current.overdue || isIsoOverdue(task.dueAt));
+      current.meetingToday = Boolean(current.meetingToday || (task.type === "MEETING" && isIsoWithinDay(task.dueAt)));
+      if (!current.nextTaskDueAt || new Date(task.dueAt).getTime() < new Date(current.nextTaskDueAt).getTime()) current.nextTaskDueAt = task.dueAt;
+      taskMetaByContact.set(task.contactId, current);
     }
 
-    const readyToCall = cafeContacts.filter((contact) => isRealPhone(contact.phone) && !STAGES_EXCLUDED_FROM_CALL_QUEUE.has(contact.stage));
-    const needsPhone = cafeContacts.filter((contact) => !isRealPhone(contact.phone) && contact.stage !== "LOST");
-    const callQueue = readyToCall
-      .sort((left, right) => serializeProspectingContact(right).score - serializeProspectingContact(left).score)
-      .slice(0, 30)
-      .map((contact) => ({ ...serializeProspectingContact(contact), pendingTasks: taskByContact.get(contact.id) ?? 0 }));
+    const serialize = (contact: ContactRow) => serializeProspectingContact(contact, taskMetaByContact.get(contact.id));
+    const readyToCall = visibleContacts.filter((contact) => isRealPhone(contact.phone) && !STAGES_EXCLUDED_FROM_CALL_QUEUE.has(contact.stage));
+    const needsPhone = visibleContacts.filter((contact) => !isRealPhone(contact.phone) && contact.stage !== "LOST");
+    const overdueContactIds = new Set(tasks.filter((task) => task.contactId && isIsoOverdue(task.dueAt)).map((task) => task.contactId as string));
+    const dueTodayContactIds = new Set(tasks.filter((task) => task.contactId && isIsoWithinDay(task.dueAt)).map((task) => task.contactId as string));
+    const meetingsTodayContactIds = new Set(tasks.filter((task) => task.contactId && task.type === "MEETING" && isIsoWithinDay(task.dueAt)).map((task) => task.contactId as string));
 
-    const campaigns = new Map<string, { area: string; total: number; readyToCall: number; called: number; meetings: number; clients: number; lost: number; needsPhone: number }>();
+    const callQueue = readyToCall
+      .map(serialize)
+      .sort((left, right) => {
+        const leftUrgency = left.recommendedAction.urgency === "HIGH" ? 1 : 0;
+        const rightUrgency = right.recommendedAction.urgency === "HIGH" ? 1 : 0;
+        return rightUrgency - leftUrgency || right.score - left.score;
+      })
+      .slice(0, 35);
+
+    const campaigns = new Map<string, { area: string; total: number; readyToCall: number; called: number; meetings: number; clients: number; lost: number; needsPhone: number; overdue: number; score: number; coverage: number; priority: LeadPriority }>();
     for (const contact of cafeContacts) {
       const area = contact.area || "Unassigned area";
-      const current = campaigns.get(area) ?? { area, total: 0, readyToCall: 0, called: 0, meetings: 0, clients: 0, lost: 0, needsPhone: 0 };
+      const current = campaigns.get(area) ?? { area, total: 0, readyToCall: 0, called: 0, meetings: 0, clients: 0, lost: 0, needsPhone: 0, overdue: 0, score: 0, coverage: 0, priority: "LOW" as LeadPriority };
       current.total += 1;
       if (isRealPhone(contact.phone) && !STAGES_EXCLUDED_FROM_CALL_QUEUE.has(contact.stage)) current.readyToCall += 1;
       if (!isRealPhone(contact.phone)) current.needsPhone += 1;
@@ -289,20 +385,52 @@ export async function handleAcquisitionRoute(request: Request, env: BackendEnv, 
       if (contact.stage === "VISIT" || contact.stage === "FREE_TRIAL") current.meetings += 1;
       if (contact.stage === "CLIENT") current.clients += 1;
       if (contact.stage === "LOST") current.lost += 1;
+      if (overdueContactIds.has(contact.id)) current.overdue += 1;
+      current.score += leadScoreBreakdown(contact, taskMetaByContact.get(contact.id)).total;
       campaigns.set(area, current);
     }
 
+    const areaCampaigns = Array.from(campaigns.values()).map((campaign) => {
+      const averageScore = Math.round(campaign.score / Math.max(1, campaign.total));
+      const coverage = Math.round((campaign.called / Math.max(1, campaign.total)) * 100);
+      return { ...campaign, score: averageScore, coverage, priority: priorityFromScore(Math.min(100, averageScore + campaign.readyToCall + campaign.overdue * 5)) };
+    }).sort((left, right) => right.readyToCall - left.readyToCall || right.score - left.score || right.total - left.total);
+
+    const primaryArea = selectedArea || areaCampaigns[0]?.area || null;
+    const followUpDue = visibleContacts.filter((contact) => overdueContactIds.has(contact.id) || dueTodayContactIds.has(contact.id)).map(serialize).sort((left, right) => right.score - left.score).slice(0, 20);
+    const meetingsToday = visibleContacts.filter((contact) => meetingsTodayContactIds.has(contact.id)).map(serialize).slice(0, 12);
+
     return jsonResponse({
+      activeArea: selectedArea || null,
+      dailyPlan: {
+        date: new Date().toISOString(),
+        targetCalls: Math.min(25, Math.max(10, callQueue.length)),
+        primaryArea,
+        firstLeadId: callQueue[0]?.id ?? null,
+        readyNow: callQueue.length,
+        overdueFollowUps: followUpDue.filter((contact) => contact.recommendedAction.key === "CALL_OVERDUE").length,
+        dueFollowUps: followUpDue.length,
+        meetingsToday: meetingsToday.length,
+        needsEnrichment: needsPhone.length,
+        focus: primaryArea ? `Focus on ${primaryArea}: call ready leads first, then enrich missing-phone cafes.` : "Import or enrich café leads before starting today's call block.",
+      },
       counts: {
-        totalCafeLeads: cafeContacts.length,
+        totalCafeLeads: visibleContacts.length,
         readyToCall: readyToCall.length,
         needsPhone: needsPhone.length,
-        contacted: cafeContacts.filter((contact) => Boolean(contact.lastContactedAt)).length,
-        meetings: cafeContacts.filter((contact) => contact.stage === "VISIT" || contact.stage === "FREE_TRIAL").length,
+        contacted: visibleContacts.filter((contact) => Boolean(contact.lastContactedAt)).length,
+        meetings: visibleContacts.filter((contact) => contact.stage === "VISIT" || contact.stage === "FREE_TRIAL").length,
+      },
+      globalCounts: {
+        totalCafeLeads: cafeContacts.length,
+        readyToCall: cafeContacts.filter((contact) => isRealPhone(contact.phone) && !STAGES_EXCLUDED_FROM_CALL_QUEUE.has(contact.stage)).length,
+        needsPhone: cafeContacts.filter((contact) => !isRealPhone(contact.phone) && contact.stage !== "LOST").length,
       },
       callQueue,
-      needsPhone: needsPhone.slice(0, 30).map(serializeProspectingContact),
-      areaCampaigns: Array.from(campaigns.values()).sort((left, right) => right.total - left.total),
+      followUpDue,
+      meetingsToday,
+      needsPhone: needsPhone.slice(0, 35).map(serialize),
+      areaCampaigns,
       templates: templateSet(),
       outcomes: [
         { key: "NO_ANSWER", label: "No answer", tone: "amber" },
