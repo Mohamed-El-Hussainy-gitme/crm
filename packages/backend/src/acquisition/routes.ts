@@ -4,6 +4,7 @@ import { assertTrustedOrigin, requireUser } from "../auth/session.js";
 import type { AuthUser } from "../auth/types.js";
 import { HttpError } from "../common/errors.js";
 import { jsonResponse } from "../common/http.js";
+import { parseMapsIntake } from "./maps-intake.js";
 import { readJsonBody } from "../common/validation.js";
 import { createActivity } from "../core/business.js";
 import { CoreRepository } from "../core/repository.js";
@@ -185,6 +186,40 @@ function parseLeadChunk(chunk: string, defaultArea?: string, defaultSource = "Go
   };
 }
 
+
+async function parseLeadChunkDeep(chunk: string, defaultArea?: string, defaultSource = "Google Maps"): Promise<ParsedCafeLead | null> {
+  const local = parseLeadChunk(chunk, defaultArea, defaultSource);
+  const resolved = await parseMapsIntake(chunk, { defaultArea, defaultSource, resolveRemote: true }).catch(() => null);
+  const name = resolved?.placeLabel || resolved?.company || local?.name || "";
+  if (!name || name.length < 2) return local;
+
+  const phone = resolved?.phone || local?.phone || null;
+  const area = resolved?.area || local?.area || defaultArea || null;
+  const address = resolved?.locationText || local?.address || null;
+  const mapUrl = resolved?.mapUrl || local?.mapUrl || null;
+  const score = scoreLead({ name, phone, area, mapUrl, address });
+  const warnings = Array.from(new Set([...(local?.warnings ?? []), ...(resolved?.warnings ?? [])]));
+  if (!isRealPhone(phone) && !warnings.some((item) => item.toLowerCase().includes("phone"))) {
+    warnings.push("Phone missing; import will create a Needs phone lead.");
+  }
+
+  return {
+    id: `lead_${hashText(`${name}|${phone ?? ""}|${mapUrl ?? ""}|${address ?? ""}`)}`,
+    name,
+    phone,
+    normalizedPhone: normalizePhone(phone),
+    area,
+    address,
+    mapUrl,
+    source: resolved?.source || local?.source || defaultSource || "Google Maps",
+    notes: chunk.length > 1000 ? chunk.slice(0, 1000) : chunk,
+    score,
+    confidence: score >= 75 ? "HIGH" : score >= 50 ? "MEDIUM" : "LOW",
+    tags: Array.from(new Set([...(local?.tags ?? CAFE_TAGS), ...CAFE_TAGS, isRealPhone(phone) ? "ready-to-call" : "needs-phone"])),
+    warnings,
+  };
+}
+
 function daysSince(iso?: string | null): number | null {
   if (!iso) return null;
   const parsed = new Date(iso).getTime();
@@ -303,7 +338,7 @@ function outcomePlan(outcome: CafeCallOutcome, body: { meetingAt?: string | unde
     ALREADY_HAS_SYSTEM: { stage: "ON_HOLD", taskTitle: "Check replacement timing", taskType: "FOLLOW_UP", dueAt: body.followUpAt ?? dueAt(12, 30), priority: "LOW", tag: "has-system", note: "Already has a system. Follow up later." },
     NEEDS_OWNER: { stage: "POTENTIAL", taskTitle: "Call owner / decision maker", taskType: "CALL", dueAt: body.followUpAt ?? dueAt(19, 0), priority: "HIGH", tag: "needs-owner", note: "Need to reach owner or decision maker." },
   };
-  return plans[outcome];
+  return plans[outcome]!;
 }
 
 function contactMatchesCafeProspecting(contact: ContactRow): boolean {
@@ -447,8 +482,7 @@ export async function handleAcquisitionRoute(request: Request, env: BackendEnv, 
     const parsed = parseCafeLeadsSchema.safeParse(await readJsonBody(request));
     if (!parsed.success) throw new HttpError("Invalid Google Maps intake payload", 400, parsed.error.flatten());
     const chunks = chunkInput(parsed.data.input);
-    const leads = chunks
-      .map((chunk) => parseLeadChunk(chunk, parsed.data.defaultArea, parsed.data.defaultSource))
+    const leads = (await Promise.all(chunks.slice(0, 50).map((chunk) => parseLeadChunkDeep(chunk, parsed.data.defaultArea, parsed.data.defaultSource))))
       .filter((lead): lead is ParsedCafeLead => Boolean(lead));
     if (!leads.length) throw new HttpError("Could not detect any café leads from the pasted input", 400);
     return jsonResponse({ leads, summary: { detected: leads.length, readyToCall: leads.filter((lead) => isRealPhone(lead.phone)).length, needsPhone: leads.filter((lead) => !isRealPhone(lead.phone)).length } });

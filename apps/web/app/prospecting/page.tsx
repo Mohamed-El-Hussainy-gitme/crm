@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import type { Route } from "next";
 import { useEffect, useMemo, useState } from "react";
 import { AppShell } from "@/components/layout";
 import { Badge, Card, EmptyState, PageHeader, StatCard } from "@/components/cards";
@@ -546,6 +547,7 @@ export default function ProspectingPage() {
           description="A backend-driven workflow for finding cafes, prioritizing calls, recording outcomes, and preparing the next action without paid Google Maps APIs."
           actions={
             <div className="flex flex-wrap gap-3">
+              <Link href={"/pipeline" as Route} className={buttonStyles("secondary")}>Demo pipeline</Link>
               <button type="button" className={buttonStyles("secondary")} onClick={() => setActiveView("intake")}>Add Maps leads</button>
               <button type="button" className={buttonStyles("primary")} onClick={() => setInput(sampleMapsText)}>Load sample intake</button>
             </div>

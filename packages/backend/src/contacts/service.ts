@@ -1,4 +1,5 @@
-import { createContactSchema, parseLocationIntake, pipelineStageSchema } from "@smartcrm/shared";
+import { createContactSchema, pipelineStageSchema } from "@smartcrm/shared";
+import { parseMapsIntake } from "../acquisition/maps-intake.js";
 import { HttpError } from "../common/errors.js";
 import { readJsonBody } from "../common/validation.js";
 import { CoreRepository } from "../core/repository.js";
@@ -112,7 +113,7 @@ export class ContactsService {
     if (input.length < 4 || input.length > 2000) {
       throw new HttpError("Invalid location intake input", 400);
     }
-    return parseLocationIntake(input);
+    return parseMapsIntake(input, { resolveRemote: true, defaultSource: "Google Maps" });
   }
 
   async create(request: Request) {

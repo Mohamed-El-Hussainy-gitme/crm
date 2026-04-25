@@ -30,20 +30,21 @@ export function PageHeader({
   actions?: ReactNode;
 }) {
   return (
-    <div className="overflow-hidden rounded-xl border border-enterprise-border bg-white shadow-panel">
-      <div className="border-b border-enterprise-border bg-enterprise-primary px-5 py-5 text-white md:px-6">
+    <div className="overflow-hidden rounded-enterprise border border-enterprise-border bg-white shadow-panel">
+      <div className="h-1.5 bg-gradient-to-r from-enterprise-primary via-enterprise-primary to-enterprise-secondary" />
+      <div className="px-5 py-5 md:px-6">
         <div className="flex flex-wrap items-start justify-between gap-4">
-          <div className="max-w-3xl">
+          <div className="max-w-4xl">
             {eyebrow ? (
               <p className="text-xs font-bold uppercase tracking-[0.2em] text-enterprise-secondary">
                 {eyebrow}
               </p>
             ) : null}
-            <h1 className="font-display mt-2 text-4xl font-semibold tracking-tight text-white md:text-[2.75rem]">
+            <h1 className="font-display mt-2 text-3xl font-semibold tracking-tight text-enterprise-text md:text-4xl">
               {title}
             </h1>
             {description ? (
-              <p className="mt-3 max-w-3xl text-sm leading-6 text-white/72">
+              <p className="mt-3 max-w-4xl text-sm leading-6 text-enterprise-muted">
                 {description}
               </p>
             ) : null}
@@ -51,7 +52,7 @@ export function PageHeader({
           {actions ? <div className="flex flex-wrap gap-3">{actions}</div> : null}
         </div>
       </div>
-      <div className="flex flex-wrap items-center gap-3 bg-enterprise-surface50 px-5 py-3 text-xs font-semibold uppercase tracking-[0.14em] text-enterprise-muted md:px-6">
+      <div className="flex flex-wrap items-center gap-3 border-t border-enterprise-border bg-enterprise-surface50 px-5 py-3 text-xs font-semibold uppercase tracking-[0.14em] text-enterprise-muted md:px-6">
         <span className="h-2 w-2 rounded-full bg-enterprise-secondary" />
         <span>Backend driven</span>
         <span className="h-1 w-1 rounded-full bg-enterprise-border" />
@@ -62,7 +63,6 @@ export function PageHeader({
     </div>
   );
 }
-
 export function Card({
   title,
   description,

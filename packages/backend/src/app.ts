@@ -12,6 +12,7 @@ import { handleContactsRoute } from "./contacts/routes.js";
 import { handleCompaniesRoute } from "./companies/routes.js";
 import { handleDataToolsRoute } from "./data-tools/routes.js";
 import { handleDealsRoute } from "./deals/routes.js";
+import { handleDemoPipelineRoute } from "./demo-pipeline/routes.js";
 import { handleFollowUpsRoute } from "./followups/routes.js";
 import { handleIntelligenceRoute } from "./intelligence/routes.js";
 import { handleNotificationsRoute } from "./notifications/routes.js";
@@ -115,6 +116,7 @@ export function createBackendApp() {
           handleContactsRoute,
           handleCompaniesRoute,
           handleDataToolsRoute,
+          handleDemoPipelineRoute,
           handleDealsRoute,
           handleNotificationsRoute,
           handleReportsRoute,

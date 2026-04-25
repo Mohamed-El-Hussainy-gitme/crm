@@ -35,11 +35,14 @@ type EditableContact = {
 type ParsedLocationResponse = {
   source: string;
   mapUrl?: string;
+  resolvedUrl?: string;
   placeLabel?: string;
   locationText?: string;
   area?: string;
   company?: string;
   firstName?: string;
+  phone?: string;
+  confidence?: "HIGH" | "MEDIUM" | "LOW";
   warnings?: string[];
 };
 
@@ -115,6 +118,19 @@ function parseTags(value: string) {
   return value.split(",").map((item) => item.trim()).filter(Boolean);
 }
 
+function stableMissingPhone(seed: string) {
+  let hash = 2166136261;
+  for (let index = 0; index < seed.length; index += 1) {
+    hash ^= seed.charCodeAt(index);
+    hash = Math.imul(hash, 16777619);
+  }
+  return `NO-PHONE-${Math.abs(hash >>> 0).toString(36).toUpperCase()}`.slice(0, 30);
+}
+
+function mergeTagText(current: string, additions: string[]) {
+  return Array.from(new Set([...parseTags(current), ...additions].map((item) => item.trim()).filter(Boolean))).join(", ");
+}
+
 function buildPayload(form: ContactFormState) {
   return {
     firstName: form.firstName,
@@ -150,12 +166,14 @@ export function ContactEditorDrawer({ open, mode, contact, onClose, onSaved }: C
   const [submitError, setSubmitError] = useState("");
   const [saving, setSaving] = useState(false);
   const [parsingLocation, setParsingLocation] = useState(false);
+  const [autofillResult, setAutofillResult] = useState<ParsedLocationResponse | null>(null);
 
   useEffect(() => {
     if (!open) return;
     setForm(createDefaultState(contact));
     setErrors({});
     setSubmitError("");
+    setAutofillResult(null);
   }, [contact, mode, open]);
 
   const whatsappPhone = useMemo(() => normalizeWhatsappPhone(form.phone), [form.phone]);
@@ -186,16 +204,24 @@ export function ContactEditorDrawer({ open, mode, contact, onClose, onSaved }: C
         body: JSON.stringify({ input: form.locationSeed.trim() }),
       });
 
-      setForm((current) => ({
-        ...current,
-        source: current.source || parsed.source || "Google Maps",
-        mapUrl: parsed.mapUrl || current.mapUrl,
-        placeLabel: parsed.placeLabel || current.placeLabel,
-        locationText: parsed.locationText || current.locationText,
-        area: parsed.area || current.area,
-        company: current.company || parsed.company || current.placeLabel,
-        firstName: current.firstName || parsed.firstName || current.placeLabel,
-      }));
+      setAutofillResult(parsed);
+      setForm((current) => {
+        const detectedName = parsed.firstName || parsed.company || parsed.placeLabel || "";
+        const detectedPhone = parsed.phone || "";
+        const nextPhone = current.phone || detectedPhone || (detectedName ? stableMissingPhone(`${detectedName}|${parsed.mapUrl || parsed.resolvedUrl || form.locationSeed}`) : current.phone);
+        return {
+          ...current,
+          source: current.source || parsed.source || "Google Maps",
+          mapUrl: parsed.mapUrl || parsed.resolvedUrl || current.mapUrl,
+          placeLabel: parsed.placeLabel || current.placeLabel,
+          locationText: parsed.locationText || current.locationText,
+          area: parsed.area || current.area,
+          company: current.company || parsed.company || detectedName,
+          firstName: current.firstName || detectedName,
+          phone: nextPhone,
+          tags: mergeTagText(current.tags, ["ahwa", "cafe", "prospecting", "maps", detectedPhone ? "ready-to-call" : "needs-phone"]),
+        };
+      });
 
       notify({
         tone: "success",
@@ -264,7 +290,7 @@ export function ContactEditorDrawer({ open, mode, contact, onClose, onSaved }: C
       description={isEditMode ? t("contactEditor.editDescription") : t("contactEditor.createDescription")}
     >
       <form onSubmit={handleSubmit} className="space-y-6">
-        <div className="rounded-[24px] border border-slate-200 bg-slate-50 p-4">
+        <div className="rounded-enterprise border border-enterprise-border bg-enterprise-surface50 p-4">
           <div className="grid gap-3 md:grid-cols-[1fr_auto] md:items-end">
             <FieldShell label={t("contactEditor.locationSeedLabel")} hint={t("contactEditor.locationSeedHint")}>
               <Textarea value={form.locationSeed} onChange={(event) => setField("locationSeed", event.target.value)} placeholder={t("contactEditor.locationSeedPlaceholder")} className="min-h-24" />
@@ -274,6 +300,27 @@ export function ContactEditorDrawer({ open, mode, contact, onClose, onSaved }: C
             </button>
           </div>
           <InlineFieldError message={fieldError(errors, "locationSeed")} />
+          {autofillResult ? (
+            <div className="mt-4 rounded-enterprise border border-enterprise-border bg-white p-4">
+              <div className="flex flex-wrap items-start justify-between gap-3">
+                <div>
+                  <p className="text-xs font-bold uppercase tracking-[0.16em] text-enterprise-muted">Autofill result</p>
+                  <p className="mt-1 font-display text-xl font-semibold text-enterprise-text">{autofillResult.placeLabel || autofillResult.company || "Name not detected"}</p>
+                </div>
+                <span className="rounded-md border border-enterprise-border bg-enterprise-surface px-2.5 py-1 text-xs font-bold text-enterprise-text">{autofillResult.confidence || "LOW"}</span>
+              </div>
+              <div className="mt-3 grid gap-2 text-xs text-enterprise-muted sm:grid-cols-2">
+                <span>Phone: <b className="text-enterprise-text">{autofillResult.phone || "not detected"}</b></span>
+                <span>Area: <b className="text-enterprise-text">{autofillResult.area || "not detected"}</b></span>
+                <span className="sm:col-span-2">Address: <b className="text-enterprise-text">{autofillResult.locationText || "not detected"}</b></span>
+              </div>
+              {autofillResult.warnings?.length ? (
+                <ul className="mt-3 space-y-1 text-xs leading-5 text-enterprise-warning">
+                  {autofillResult.warnings.slice(0, 3).map((warning) => <li key={warning}>• {warning}</li>)}
+                </ul>
+              ) : null}
+            </div>
+          ) : null}
         </div>
 
         {submitError ? <p className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">{submitError}</p> : null}
