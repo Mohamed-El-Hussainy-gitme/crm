@@ -39,6 +39,11 @@ type ParsedLocationResponse = {
   placeLabel?: string;
   locationText?: string;
   area?: string;
+  city?: string;
+  latitude?: number;
+  longitude?: number;
+  coordinates?: string;
+  plusCode?: string;
   company?: string;
   firstName?: string;
   phone?: string;
@@ -312,7 +317,10 @@ export function ContactEditorDrawer({ open, mode, contact, onClose, onSaved }: C
               <div className="mt-3 grid gap-2 text-xs text-enterprise-muted sm:grid-cols-2">
                 <span>Phone: <b className="text-enterprise-text">{autofillResult.phone || "not detected"}</b></span>
                 <span>Area: <b className="text-enterprise-text">{autofillResult.area || "not detected"}</b></span>
-                <span className="sm:col-span-2">Address: <b className="text-enterprise-text">{autofillResult.locationText || "not detected"}</b></span>
+                <span>City: <b className="text-enterprise-text">{autofillResult.city || "not detected"}</b></span>
+                <span>Coordinates: <b className="text-enterprise-text force-ltr" dir="ltr">{autofillResult.coordinates || "not detected"}</b></span>
+                <span className="sm:col-span-2">Readable address: <b className="text-enterprise-text">{autofillResult.locationText || "not detected"}</b></span>
+                {autofillResult.plusCode ? <span className="sm:col-span-2">Plus code: <b className="text-enterprise-text force-ltr" dir="ltr">{autofillResult.plusCode}</b></span> : null}
               </div>
               {autofillResult.warnings?.length ? (
                 <ul className="mt-3 space-y-1 text-xs leading-5 text-enterprise-warning">

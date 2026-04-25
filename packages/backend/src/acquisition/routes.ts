@@ -5,6 +5,7 @@ import type { AuthUser } from "../auth/types.js";
 import { HttpError } from "../common/errors.js";
 import { jsonResponse } from "../common/http.js";
 import { parseMapsIntake } from "./maps-intake.js";
+import { coordinatesLabel, normalizeLocationInput } from "./location-normalizer.js";
 import { duplicateCandidatesForLead, parseCapturedPlace } from "./capture-assistant.js";
 import { readJsonBody } from "../common/validation.js";
 import { createActivity } from "../core/business.js";
@@ -20,7 +21,12 @@ type ParsedCafeLead = {
   phone: string | null;
   normalizedPhone: string | null;
   area: string | null;
+  city?: string | null;
   address: string | null;
+  latitude?: number | null;
+  longitude?: number | null;
+  coordinates?: string | null;
+  plusCode?: string | null;
   mapUrl: string | null;
   source: string;
   notes: string | null;
@@ -162,28 +168,34 @@ function parseLeadChunk(chunk: string, defaultArea?: string, defaultSource = "Go
   const name = normalizeLine(nameFromUrl || nameLine || "");
   if (!name || name.length < 2) return null;
 
-  const address = rawLines.find((line) => line !== nameLine && !extractPhone(line) && !line.startsWith("http") && !looksLikeMetadata(line)) ?? null;
-  const area = inferArea(rawLines, defaultArea);
-  const score = scoreLead({ name, phone, area, mapUrl, address });
-  const warnings: string[] = [];
+  const explicitAddress = rawLines.find((line) => line !== nameLine && !extractPhone(line) && !line.startsWith("http") && !looksLikeMetadata(line)) ?? null;
+  const normalizedLocation = normalizeLocationInput({ rawText: chunk, explicitAddress, defaultArea, mapUrl });
+  const address = normalizedLocation.address;
+  const area = normalizedLocation.area;
+  const score = scoreLead({ name, phone, area, mapUrl: normalizedLocation.mapUrl ?? mapUrl, address });
+  const warnings: string[] = [...normalizedLocation.warnings];
   if (!isRealPhone(phone)) warnings.push("Phone missing; import will create a Needs phone lead.");
-  if (!area) warnings.push("Area not detected; add a campaign area before importing.");
-  if (!mapUrl) warnings.push("Google Maps URL missing; duplicate detection will be weaker.");
+  if (!normalizedLocation.mapUrl && !mapUrl) warnings.push("Google Maps URL missing; duplicate detection will be weaker.");
 
   return {
-    id: `lead_${hashText(`${name}|${phone ?? ""}|${mapUrl ?? ""}|${address ?? ""}`)}`,
+    id: `lead_${hashText(`${name}|${phone ?? ""}|${normalizedLocation.mapUrl ?? mapUrl ?? ""}|${address ?? ""}`)}`,
     name,
     phone,
     normalizedPhone: normalizePhone(phone),
     area,
+    city: normalizedLocation.city,
     address,
-    mapUrl,
+    latitude: normalizedLocation.latitude,
+    longitude: normalizedLocation.longitude,
+    coordinates: coordinatesLabel(normalizedLocation.latitude, normalizedLocation.longitude),
+    plusCode: normalizedLocation.plusCode,
+    mapUrl: normalizedLocation.mapUrl ?? mapUrl,
     source: defaultSource || "Google Maps",
     notes: chunk.length > 1000 ? chunk.slice(0, 1000) : chunk,
     score,
     confidence: score >= 75 ? "HIGH" : score >= 50 ? "MEDIUM" : "LOW",
     tags: [...CAFE_TAGS, isRealPhone(phone) ? "ready-to-call" : "needs-phone"],
-    warnings,
+    warnings: Array.from(new Set(warnings)),
   };
 }
 
@@ -198,6 +210,9 @@ async function parseLeadChunkDeep(chunk: string, defaultArea?: string, defaultSo
   const area = resolved?.area || local?.area || defaultArea || null;
   const address = resolved?.locationText || local?.address || null;
   const mapUrl = resolved?.mapUrl || local?.mapUrl || null;
+  const city = resolved?.city || local?.city || null;
+  const latitude = resolved?.latitude ?? local?.latitude ?? null;
+  const longitude = resolved?.longitude ?? local?.longitude ?? null;
   const score = scoreLead({ name, phone, area, mapUrl, address });
   const warnings = Array.from(new Set([...(local?.warnings ?? []), ...(resolved?.warnings ?? [])]));
   if (!isRealPhone(phone) && !warnings.some((item) => item.toLowerCase().includes("phone"))) {
@@ -210,7 +225,12 @@ async function parseLeadChunkDeep(chunk: string, defaultArea?: string, defaultSo
     phone,
     normalizedPhone: normalizePhone(phone),
     area,
+    city,
     address,
+    latitude,
+    longitude,
+    coordinates: coordinatesLabel(latitude, longitude),
+    plusCode: resolved?.plusCode || local?.plusCode || null,
     mapUrl,
     source: resolved?.source || local?.source || defaultSource || "Google Maps",
     notes: chunk.length > 1000 ? chunk.slice(0, 1000) : chunk,
@@ -564,8 +584,14 @@ export async function handleAcquisitionRoute(request: Request, env: BackendEnv, 
         createdAt: timestamp,
         updatedAt: timestamp,
       });
-      if (lead.notes?.trim()) await repo.createNote({ id: createId(), contactId: contact.id, body: lead.notes.trim(), createdAt: timestamp }).catch(() => null);
-      await createActivity(repo, contact.id, "CAFE_LEAD_IMPORTED", { source: lead.source, score: lead.score, area: lead.area, mapUrl: lead.mapUrl });
+      const locationMeta = [
+        lead.city ? `City: ${lead.city}` : null,
+        lead.coordinates ? `Coordinates: ${lead.coordinates}` : null,
+        lead.plusCode ? `Plus code: ${lead.plusCode}` : null,
+      ].filter(Boolean).join("\n");
+      const importNotes = [lead.notes?.trim(), locationMeta].filter(Boolean).join("\n\n");
+      if (importNotes) await repo.createNote({ id: createId(), contactId: contact.id, body: importNotes, createdAt: timestamp }).catch(() => null);
+      await createActivity(repo, contact.id, "CAFE_LEAD_IMPORTED", { source: lead.source, score: lead.score, area: lead.area, city: lead.city, coordinates: lead.coordinates, mapUrl: lead.mapUrl });
       existingContacts.push(contact);
       results.push({ name: lead.name, status: "CREATED", contact: serializeProspectingContact(contact) });
     }

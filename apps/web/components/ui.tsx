@@ -21,14 +21,14 @@ export function buttonStyles(
   block = false,
 ) {
   return cx(
-    "inline-flex min-h-11 items-center justify-center gap-2 rounded-enterprise border font-semibold tracking-[-0.01em] transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-enterprise-secondary focus-visible:ring-offset-2 focus-visible:ring-offset-white disabled:cursor-not-allowed disabled:opacity-55",
-    size === "sm" ? "px-3 py-2 text-xs" : "px-4 py-3 text-sm",
+    "inline-flex min-h-10 items-center justify-center gap-2 rounded-enterprise border font-bold tracking-[-0.03em] transition active:translate-y-px focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-enterprise-primary focus-visible:ring-offset-2 focus-visible:ring-offset-enterprise-surface disabled:cursor-not-allowed disabled:opacity-55",
+    size === "sm" ? "px-3 py-2 text-xs" : "px-4 py-2.5 text-sm",
     block && "w-full",
-    variant === "primary" && "border-enterprise-primary bg-enterprise-primary text-white hover:bg-enterprise-primaryMuted",
-    variant === "secondary" && "border-enterprise-border bg-white text-enterprise-text hover:border-enterprise-primary hover:bg-enterprise-surface",
-    variant === "ghost" && "border-transparent bg-transparent text-enterprise-muted hover:bg-enterprise-surface hover:text-enterprise-text",
-    variant === "success" && "border-enterprise-success bg-enterprise-success text-white hover:brightness-95",
-    variant === "danger" && "border-enterprise-danger bg-enterprise-danger text-white hover:brightness-95",
+    variant === "primary" && "border-enterprise-primary bg-enterprise-primary text-white shadow-panel hover:bg-enterprise-primaryMuted",
+    variant === "secondary" && "border-transparent bg-enterprise-secondary text-enterprise-text shadow-panel hover:text-enterprise-primary",
+    variant === "ghost" && "border-transparent bg-transparent text-enterprise-muted hover:bg-enterprise-secondary hover:text-enterprise-text hover:shadow-panel",
+    variant === "success" && "border-enterprise-success bg-enterprise-success text-white shadow-panel hover:brightness-95",
+    variant === "danger" && "border-enterprise-danger bg-enterprise-danger text-white shadow-panel hover:brightness-95",
   );
 }
 
@@ -81,7 +81,7 @@ export function CheckboxCard({
   hint?: string;
 }) {
   return (
-    <label className="flex min-h-12 items-start gap-3 rounded-enterprise border border-enterprise-border bg-white px-4 py-3 text-sm text-enterprise-muted shadow-sm hover:border-enterprise-primary">
+    <label className="flex min-h-12 items-start gap-3 rounded-enterprise border border-transparent bg-enterprise-secondary px-4 py-3 text-sm text-enterprise-muted shadow-panel hover:text-enterprise-text">
       <input
         type="checkbox"
         checked={checked}
@@ -193,7 +193,7 @@ export function InfoTile({
   hint?: string;
 }) {
   return (
-    <div className="rounded-enterprise border border-enterprise-border bg-enterprise-surface px-4 py-4">
+    <div className="rounded-enterprise border border-transparent bg-enterprise-surface px-4 py-4 shadow-insetSoft">
       <p className="text-xs font-bold uppercase tracking-[0.16em] text-enterprise-muted">
         {label}
       </p>
@@ -219,10 +219,10 @@ export function ListRow({
   return (
     <div
       className={cx(
-        "rounded-enterprise border px-4 py-4 shadow-sm",
+        "rounded-enterprise border px-4 py-4",
         highlighted
-          ? "border-enterprise-secondary bg-enterprise-secondary/10"
-          : "border-enterprise-border bg-white",
+          ? "border-enterprise-primary bg-enterprise-primary/10 shadow-insetSoft"
+          : "border-transparent bg-enterprise-secondary shadow-panel",
       )}
     >
       <div className="flex flex-wrap items-start justify-between gap-4">
@@ -238,11 +238,11 @@ export function ListRow({
 }
 
 const baseFieldClass =
-  "w-full rounded-enterprise border border-enterprise-border bg-white px-4 py-3 text-sm text-enterprise-text placeholder:text-enterprise-muted/70 shadow-sm focus:border-enterprise-secondary focus:ring-2 focus:ring-enterprise-secondary/30";
+  "w-full rounded-enterprise border border-transparent bg-enterprise-surface px-4 py-2.5 text-sm text-enterprise-text placeholder:text-enterprise-muted/70 shadow-insetSoft focus:border-enterprise-primary focus:ring-2 focus:ring-enterprise-primary/25";
 
 export function MobileActionBar({ children }: { children: ReactNode }) {
   return (
-    <div className="fixed inset-x-0 bottom-0 z-40 border-t border-enterprise-border bg-white/95 px-4 pb-[calc(env(safe-area-inset-bottom,0px)+0.75rem)] pt-3 shadow-[0_-10px_30px_rgba(7,44,44,0.08)] backdrop-blur lg:hidden">
+    <div className="fixed inset-x-0 bottom-0 z-40 border-t border-enterprise-border bg-enterprise-surface/95 px-4 pb-[calc(env(safe-area-inset-bottom,0px)+0.75rem)] pt-3 shadow-panel backdrop-blur lg:hidden">
       <div className="mx-auto flex max-w-3xl gap-2 overflow-x-auto">{children}</div>
     </div>
   );

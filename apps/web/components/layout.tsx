@@ -41,19 +41,19 @@ function cx(...values: Array<string | false | null | undefined>) {
 
 function navClass(active: boolean) {
   return cx(
-    "group flex min-h-11 items-center gap-3 rounded-lg border px-3 py-2.5 text-sm font-semibold transition",
+    "group flex min-h-11 items-center gap-3 rounded-enterprise border px-3 py-2.5 text-sm font-bold transition",
     active
-      ? "border-enterprise-secondary bg-enterprise-secondary text-white shadow-sm"
-      : "border-transparent text-white/72 hover:border-white/15 hover:bg-white/9 hover:text-white",
+      ? "border-transparent bg-enterprise-primary text-white shadow-panel"
+      : "border-transparent bg-enterprise-secondary text-enterprise-muted shadow-panel hover:text-enterprise-primary",
   );
 }
 
 function mobileNavClass(active: boolean) {
   return cx(
-    "group flex min-h-11 items-center justify-between rounded-lg border px-3 py-2.5 text-sm font-semibold transition",
+    "group flex min-h-11 items-center justify-between rounded-enterprise border px-3 py-2.5 text-sm font-bold transition",
     active
-      ? "border-enterprise-primary bg-enterprise-primary text-white"
-      : "border-enterprise-border bg-white text-enterprise-text hover:bg-enterprise-surface",
+      ? "border-transparent bg-enterprise-primary text-white shadow-panel"
+      : "border-transparent bg-enterprise-secondary text-enterprise-text shadow-panel hover:text-enterprise-primary",
   );
 }
 
@@ -95,31 +95,31 @@ export function AppShell({ children }: { children: ReactNode }) {
   return (
     <div className="min-h-screen crm-shell-grid text-enterprise-text">
       <div className="flex min-h-screen">
-        <aside className="shell-sidebar hidden w-[17.5rem] shrink-0 border-r border-white/10 text-white md:flex md:flex-col">
+        <aside className="shell-sidebar hidden w-[17.5rem] shrink-0 border-r border-enterprise-border text-enterprise-text md:flex md:flex-col">
           <div className="px-5 py-5">
-            <div className="rounded-xl border border-white/10 bg-white/[0.07] p-4">
+            <div className="rounded-enterprise border border-transparent bg-enterprise-secondary p-4 shadow-panel">
               <div className="flex items-center gap-3">
-                <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-enterprise-secondary text-base font-black text-white shadow-sm">
+                <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-enterprise-primary text-base font-black text-white shadow-panel">
                   CRM
                 </div>
                 <div>
-                  <p className="text-[0.67rem] font-bold uppercase tracking-[0.24em] text-white/45">Enterprise</p>
-                  <h1 className="font-display text-xl font-semibold tracking-tight text-white">{t("layout.brandTitle")}</h1>
+                  <p className="text-[0.67rem] font-bold uppercase tracking-[0.24em] text-enterprise-muted">Neumorphism</p>
+                  <h1 className="font-display text-xl font-semibold tracking-tight text-enterprise-text">{t("layout.brandTitle")}</h1>
                 </div>
               </div>
-              <p className="mt-4 text-xs leading-5 text-white/58">{t("layout.brandDescription")}</p>
+              <p className="mt-4 text-xs leading-5 text-enterprise-muted">{t("layout.brandDescription")}</p>
             </div>
           </div>
 
           <nav className="flex-1 space-y-6 overflow-y-auto px-3 pb-5">
             <section>
-              <p className="px-3 text-[0.68rem] font-bold uppercase tracking-[0.22em] text-white/38">{t("common.dailyWorkflow")}</p>
+              <p className="px-3 text-[0.68rem] font-bold uppercase tracking-[0.22em] text-enterprise-muted">{t("common.dailyWorkflow")}</p>
               <div className="mt-2 space-y-1">
                 {visiblePrimary.map((item) => {
                   const active = isActive(pathname, item);
                   return (
                     <Link key={item.href} href={item.href} className={navClass(active)}>
-                      <span className={cx("flex h-7 w-8 shrink-0 items-center justify-center rounded-md border text-[0.68rem] font-bold", active ? "border-white/25 bg-white/15 text-white" : "border-white/10 bg-white/5 text-white/42")}>
+                      <span className={cx("flex h-7 w-8 shrink-0 items-center justify-center rounded-md border text-[0.68rem] font-bold", active ? "border-white/25 bg-white/15 text-white" : "border-transparent bg-enterprise-surface text-enterprise-muted shadow-insetSoft")}>
                         {item.shortcut}
                       </span>
                       <span className="min-w-0 flex-1 truncate">{t(item.labelKey)}</span>
@@ -131,11 +131,11 @@ export function AppShell({ children }: { children: ReactNode }) {
             </section>
 
             <section>
-              <p className="px-3 text-[0.68rem] font-bold uppercase tracking-[0.22em] text-white/38">{t("common.administration")}</p>
+              <p className="px-3 text-[0.68rem] font-bold uppercase tracking-[0.22em] text-enterprise-muted">{t("common.administration")}</p>
               <div className="mt-2 space-y-1">
                 {visibleSecondary.map((item) => (
                   <Link key={item.href} href={item.href} className={navClass(isActive(pathname, item))}>
-                    <span className="flex h-7 w-8 shrink-0 items-center justify-center rounded-md border border-white/10 bg-white/5 text-[0.68rem] font-bold text-white/42">{item.shortcut}</span>
+                    <span className="flex h-7 w-8 shrink-0 items-center justify-center rounded-md border border-transparent bg-enterprise-surface text-[0.68rem] font-bold text-enterprise-muted shadow-insetSoft">{item.shortcut}</span>
                     <span className="min-w-0 flex-1 truncate">{t(item.labelKey)}</span>
                     <span className="text-xs text-current/58">{navArrow}</span>
                   </Link>
@@ -144,15 +144,15 @@ export function AppShell({ children }: { children: ReactNode }) {
             </section>
           </nav>
 
-          <div className="border-t border-white/10 p-4">
-            <div className="rounded-xl border border-white/10 bg-white/[0.07] p-3">
+          <div className="border-t border-enterprise-border p-4">
+            <div className="rounded-enterprise border border-transparent bg-enterprise-secondary p-3 shadow-panel">
               <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-white text-sm font-black text-enterprise-primary">
+                <div className="flex h-10 w-10 items-center justify-center rounded-enterprise bg-enterprise-surface text-sm font-black text-enterprise-primary shadow-insetSoft">
                   {initials(user?.fullName)}
                 </div>
                 <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm font-semibold text-white">{user?.fullName ?? "CRM User"}</p>
-                  <p className="force-ltr truncate text-xs text-white/54">{user?.email ?? "—"}</p>
+                  <p className="truncate text-sm font-semibold text-enterprise-text">{user?.fullName ?? "CRM User"}</p>
+                  <p className="force-ltr truncate text-xs text-enterprise-muted">{user?.email ?? "—"}</p>
                 </div>
               </div>
               <div className="mt-3 flex items-center justify-between gap-2">
@@ -164,7 +164,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                       router.push("/login");
                     });
                   }}
-                  className="rounded-lg border border-white/10 px-3 py-2 text-xs font-semibold text-white/72 hover:bg-white/10 hover:text-white"
+                  className="rounded-enterprise border border-transparent bg-enterprise-surface px-3 py-2 text-xs font-bold text-enterprise-muted shadow-insetSoft hover:text-enterprise-primary"
                 >
                   {t("common.signOut")}
                 </button>
@@ -174,13 +174,13 @@ export function AppShell({ children }: { children: ReactNode }) {
         </aside>
 
         <div className="flex min-h-screen min-w-0 flex-1 flex-col pb-20 md:pb-0">
-          <header className="sticky top-0 z-30 border-b border-enterprise-border bg-white/92 backdrop-blur-xl">
+          <header className="sticky top-0 z-30 border-b border-enterprise-border bg-enterprise-surface/92 backdrop-blur-xl">
             <div className="flex min-h-[4.5rem] items-center justify-between gap-4 px-4 md:px-6 xl:px-8">
               <div className="flex min-w-0 items-center gap-3">
                 <button
                   type="button"
                   onClick={() => setMobileOpen((current) => !current)}
-                  className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-enterprise-border bg-white text-lg text-enterprise-primary shadow-sm md:hidden"
+                  className="inline-flex h-10 w-10 items-center justify-center rounded-enterprise border border-transparent bg-enterprise-secondary text-lg text-enterprise-primary shadow-panel md:hidden"
                   aria-label={t("layout.toggleNavigation")}
                 >
                   ☰
@@ -188,15 +188,15 @@ export function AppShell({ children }: { children: ReactNode }) {
                 <div className="min-w-0">
                   <div className="flex items-center gap-2 text-[0.68rem] font-bold uppercase tracking-[0.18em] text-enterprise-muted">
                     <span>{t("common.workspace")}</span>
-                    <span className="h-1 w-1 rounded-full bg-enterprise-secondary" />
+                    <span className="h-1 w-1 rounded-full bg-enterprise-primary" />
                     <span className="hidden sm:inline">Cloudflare</span>
                   </div>
                   <p className="font-display truncate text-2xl font-semibold tracking-tight text-enterprise-text">{pageTitle}</p>
                 </div>
               </div>
 
-              <div className="hidden min-w-[17rem] max-w-sm flex-1 items-center rounded-lg border border-enterprise-border bg-enterprise-surface50 px-3 py-2 text-sm text-enterprise-muted lg:flex">
-                <span className="me-2 text-enterprise-secondary">⌘</span>
+              <div className="hidden min-w-[17rem] max-w-sm flex-1 items-center rounded-enterprise border border-transparent bg-enterprise-surface px-3 py-2 shadow-insetSoft text-sm text-enterprise-muted lg:flex">
+                <span className="me-2 text-enterprise-primary">⌘</span>
                 <span className="truncate">{t("common.search")}</span>
               </div>
 

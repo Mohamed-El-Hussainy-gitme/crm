@@ -1,5 +1,6 @@
 import type { ContactRow } from "../core/types.js";
 import { normalizePhone, splitTags } from "../core/utils.js";
+import { coordinatesLabel, normalizeLocationInput } from "./location-normalizer.js";
 
 type CaptureConfidence = "HIGH" | "MEDIUM" | "LOW";
 
@@ -20,7 +21,12 @@ export type CaptureLead = {
   phone: string | null;
   normalizedPhone: string | null;
   area: string | null;
+  city: string | null;
   address: string | null;
+  latitude: number | null;
+  longitude: number | null;
+  coordinates: string | null;
+  plusCode: string | null;
   mapUrl: string | null;
   website: string | null;
   category: string | null;
@@ -222,22 +228,29 @@ export function parseCapturedPlace(payload: unknown, options: { defaultArea?: st
     JSON.stringify(input),
   ) ?? "";
   const pageUrl = stringField(input, ["pageUrl", "url", "mapUrl", "mapsUrl"]);
-  const mapUrl = pageUrl || extractUrl(rawText);
+  const initialMapUrl = pageUrl || extractUrl(rawText);
   const phone = compactWhitespace(stringField(input, ["phone", "telephone", "tel"]) || extractPhone(rawText));
   const explicitAddress = stringField(input, ["address", "locationText", "formattedAddress"]);
-  const name = extractName(rawText, input, mapUrl);
-  const address = extractAddress(rawText, explicitAddress, name);
-  const area = compactWhitespace(stringField(input, ["area", "district", "neighborhood"]) || inferArea(address, rawText, options.defaultArea));
+  const name = extractName(rawText, input, initialMapUrl);
+  const normalizedLocation = normalizeLocationInput({
+    rawText,
+    explicitAddress,
+    defaultArea: stringField(input, ["area", "district", "neighborhood"]) || options.defaultArea,
+    mapUrl: initialMapUrl,
+  });
+  const address = normalizedLocation.address;
+  const area = normalizedLocation.area;
+  const city = normalizedLocation.city;
+  const mapUrl = normalizedLocation.mapUrl || initialMapUrl;
   const website = compactWhitespace(stringField(input, ["website", "site", "websiteUrl"]));
   const category = compactWhitespace(stringField(input, ["category", "type", "placeType"]));
   const rating = compactWhitespace(stringField(input, ["rating", "stars"]));
   const reviewCount = compactWhitespace(stringField(input, ["reviewCount", "reviews", "reviewText"]));
   const score = scoreLead({ name, phone, area, mapUrl, address, website, rating });
-  const warnings: string[] = [];
+  const warnings: string[] = [...normalizedLocation.warnings];
 
   if (!name) warnings.push("Place name was not detected. Edit the lead before importing.");
   if (!isRealPhone(phone)) warnings.push("Phone missing or not usable. The lead will need enrichment before calling.");
-  if (!area) warnings.push("Area was not detected. Add an area to route this lead into the right campaign.");
   if (!mapUrl) warnings.push("Google Maps URL was not captured. Duplicate detection will be weaker.");
 
   const displayName = name || `Google Maps lead ${hashText(rawText).slice(0, 6).toUpperCase()}`;
@@ -245,6 +258,9 @@ export function parseCapturedPlace(payload: unknown, options: { defaultArea?: st
     category ? `Category: ${category}` : null,
     rating ? `Rating: ${rating}` : null,
     reviewCount ? `Reviews: ${reviewCount}` : null,
+    city ? `City: ${city}` : null,
+    coordinatesLabel(normalizedLocation.latitude, normalizedLocation.longitude) ? `Coordinates: ${coordinatesLabel(normalizedLocation.latitude, normalizedLocation.longitude)}` : null,
+    normalizedLocation.plusCode ? `Plus code: ${normalizedLocation.plusCode}` : null,
     website ? `Website: ${website}` : null,
     mapUrl ? `Maps: ${mapUrl}` : null,
   ].filter(Boolean).join("\n") || null;
@@ -255,7 +271,12 @@ export function parseCapturedPlace(payload: unknown, options: { defaultArea?: st
     phone,
     normalizedPhone: normalizePhone(phone),
     area,
+    city,
     address,
+    latitude: normalizedLocation.latitude,
+    longitude: normalizedLocation.longitude,
+    coordinates: coordinatesLabel(normalizedLocation.latitude, normalizedLocation.longitude),
+    plusCode: normalizedLocation.plusCode,
     mapUrl,
     website,
     category,

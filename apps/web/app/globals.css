@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Ubuntu:ital,wght@0,300;0,400;0,500;0,700;1,400&family=Ubuntu+Mono:wght@400;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap");
 
 @tailwind base;
 @tailwind components;
@@ -6,35 +6,37 @@
 
 :root {
   color-scheme: light;
-  --crm-primary: #072c2c;
-  --crm-primary-900: #031c1c;
-  --crm-primary-800: #0a3434;
-  --crm-primary-700: #123e3e;
-  --crm-secondary: #ff5f03;
-  --crm-secondary-700: #c94a00;
-  --crm-secondary-50: #fff2ea;
-  --crm-success: #16a34a;
-  --crm-success-50: #ecfdf3;
-  --crm-warning: #d97706;
-  --crm-warning-50: #fff7ed;
-  --crm-danger: #dc2626;
-  --crm-danger-50: #fff1f2;
-  --crm-surface: #edeade;
-  --crm-surface-50: #faf8f1;
-  --crm-surface-100: #f5f1e7;
-  --crm-surface-200: #e6dfcf;
-  --crm-panel: #ffffff;
-  --crm-text: #111827;
-  --crm-muted: #4b5563;
-  --crm-muted-2: #6b7280;
-  --crm-border: #d8d1c2;
-  --crm-border-strong: #b6ab97;
-  --crm-focus: #ff5f03;
-  --crm-radius-sm: 0.5rem;
-  --crm-radius-md: 0.75rem;
-  --crm-radius-lg: 1rem;
-  --crm-shadow-panel: 0 1px 2px rgba(17, 24, 39, 0.06), 0 14px 34px rgba(7, 44, 44, 0.08);
-  --crm-shadow-popover: 0 24px 70px rgba(7, 44, 44, 0.18);
+  --crm-primary: #006666;
+  --crm-primary-900: #004747;
+  --crm-primary-800: #005151;
+  --crm-primary-700: #006666;
+  --crm-secondary: #f1f2f5;
+  --crm-secondary-700: #d7d9df;
+  --crm-secondary-50: #f8f9fb;
+  --crm-success: #00a63d;
+  --crm-success-50: #eafbf0;
+  --crm-warning: #fe9900;
+  --crm-warning-50: #fff6e6;
+  --crm-danger: #ff2157;
+  --crm-danger-50: #fff0f4;
+  --crm-info: #0ea5e9;
+  --crm-surface: #e7e5e4;
+  --crm-surface-50: #f1f2f5;
+  --crm-surface-100: #e7e5e4;
+  --crm-surface-200: #d4d4d8;
+  --crm-panel: #f1f2f5;
+  --crm-text: #1e2938;
+  --crm-muted: #64748b;
+  --crm-muted-2: #718096;
+  --crm-border: rgba(30, 41, 56, 0.12);
+  --crm-border-strong: rgba(30, 41, 56, 0.24);
+  --crm-focus: #006666;
+  --crm-radius-sm: 0.85rem;
+  --crm-radius-md: 1.125rem;
+  --crm-radius-lg: 1.5rem;
+  --crm-shadow-panel: 8px 8px 18px rgba(174,171,170,0.58), -8px -8px 18px rgba(255,255,255,0.9);
+  --crm-shadow-popover: 16px 16px 42px rgba(123, 121, 121, 0.36), -12px -12px 36px rgba(255,255,255,0.95);
+  --crm-shadow-inset: inset 5px 5px 12px rgba(174,171,170,0.58), inset -5px -5px 12px rgba(255,255,255,0.86);
 }
 
 html,
@@ -44,191 +46,101 @@ body {
 
 body {
   @apply antialiased;
-  background: var(--crm-surface-50);
+  background:
+    radial-gradient(circle at 12% 8%, rgba(0, 102, 102, 0.11), transparent 22rem),
+    radial-gradient(circle at 92% 4%, rgba(255, 33, 87, 0.07), transparent 20rem),
+    var(--crm-surface);
   color: var(--crm-text);
-  font-family: Ubuntu, Inter, "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-  font-size: 15px;
+  font-family: "Space Mono", ui-monospace, SFMono-Regular, Consolas, monospace;
+  font-size: 14px;
 }
 
 html[lang="ar"] body {
-  font-family: Cairo, Tajawal, "IBM Plex Sans Arabic", Ubuntu, "Segoe UI", Tahoma, Arial, sans-serif;
+  font-family: "Space Mono", "JetBrains Mono", ui-monospace, SFMono-Regular, Consolas, monospace;
 }
 
-html[dir="rtl"] body {
-  direction: rtl;
+html[dir="rtl"] body { direction: rtl; }
+* { border-color: var(--crm-border); }
+::selection { background: var(--crm-primary); color: #fff; }
+a { @apply transition-colors; }
+
+h1, h2, h3, .font-display {
+  font-family: "Space Mono", ui-monospace, SFMono-Regular, Consolas, monospace;
+  letter-spacing: -0.045em;
 }
 
-* {
-  border-color: var(--crm-border);
+code, pre, .force-mono {
+  font-family: "JetBrains Mono", "Space Mono", ui-monospace, SFMono-Regular, Consolas, monospace;
 }
 
-::selection {
-  background: var(--crm-secondary);
-  color: #fff;
-}
-
-a {
-  @apply transition-colors;
-}
-
-h1,
-h2,
-h3,
-.font-display {
-  font-family: Oswald, Ubuntu, Inter, "Segoe UI", sans-serif;
-  letter-spacing: -0.015em;
-}
-
-code,
-pre,
-.force-mono {
-  font-family: "Ubuntu Mono", ui-monospace, SFMono-Regular, Consolas, monospace;
-}
-
-button,
-input,
-select,
-textarea {
+button, input, select, textarea {
   @apply transition outline-none;
   text-align: start;
 }
+button, input, select, textarea { min-height: 2.35rem; }
 
-button,
-input,
-select,
-textarea {
-  min-height: 2.5rem;
-}
-
-input:focus,
-select:focus,
-textarea:focus,
-button:focus-visible,
-a:focus-visible {
+input:focus, select:focus, textarea:focus, button:focus-visible, a:focus-visible {
   outline: 2px solid var(--crm-focus);
-  outline-offset: 2px;
-  box-shadow: 0 0 0 4px rgba(255, 95, 3, 0.16);
+  outline-offset: 3px;
+  box-shadow: 0 0 0 5px rgba(0,102,102,0.18), var(--crm-shadow-inset);
 }
 
-.force-ltr {
-  direction: ltr;
-  text-align: left;
-}
+.force-ltr { direction: ltr; text-align: left; }
 
-.crm-shell-grid {
-  background:
-    radial-gradient(circle at 0% 0%, rgba(255, 95, 3, 0.07), transparent 24rem),
-    linear-gradient(180deg, #fffdf7 0%, var(--crm-surface-50) 42%, var(--crm-surface-100) 100%);
-}
-
+.crm-shell-grid,
 .enterprise-grid-bg {
   background:
-    radial-gradient(circle at 10% 0%, rgba(255, 95, 3, 0.10), transparent 24rem),
-    radial-gradient(circle at 90% 0%, rgba(7, 44, 44, 0.08), transparent 24rem),
-    linear-gradient(135deg, #faf8f1 0%, #edeade 100%);
+    radial-gradient(circle at 8% 8%, rgba(0,102,102,0.12), transparent 22rem),
+    radial-gradient(circle at 90% 6%, rgba(254,153,0,0.11), transparent 18rem),
+    var(--crm-surface);
 }
 
-.crm-table th,
-.crm-table td {
-  text-align: start;
-}
-
-.crm-table tbody tr {
-  transition: background-color 160ms ease, box-shadow 160ms ease;
-}
-
-.crm-table tbody tr:hover {
-  background: rgba(237, 234, 222, 0.55);
-}
+.crm-table th, .crm-table td { text-align: start; }
+.crm-table tbody tr { transition: background-color 160ms ease, box-shadow 160ms ease, transform 160ms ease; }
+.crm-table tbody tr:hover { background: rgba(241,242,245,0.76); box-shadow: var(--crm-shadow-panel); }
 
 .shell-sidebar {
-  background:
-    linear-gradient(180deg, var(--crm-primary-900) 0%, var(--crm-primary) 65%, var(--crm-primary-800) 100%);
-  box-shadow: 18px 0 50px rgba(7, 44, 44, 0.12);
+  background: var(--crm-surface);
+  box-shadow: var(--crm-shadow-panel);
+  border-inline-end: 1px solid rgba(30,41,56,0.08);
 }
+html[dir="rtl"] .shell-sidebar { border-right-width: 0; border-left-width: 1px; box-shadow: -8px 8px 18px rgba(174,171,170,0.44), 8px -8px 18px rgba(255,255,255,0.75); }
+html[dir="rtl"] .drawer-panel { border-left-width: 0; border-right-width: 1px; }
+html[dir="rtl"] .drawer-root { justify-content: flex-start; }
 
-html[dir="rtl"] .shell-sidebar {
-  box-shadow: -18px 0 50px rgba(7, 44, 44, 0.12);
-}
+.neu-raised { background: var(--crm-panel); box-shadow: var(--crm-shadow-panel); }
+.neu-pressed { background: var(--crm-surface); box-shadow: var(--crm-shadow-inset); }
+.neu-border { border: 1px solid rgba(30,41,56,0.1); }
 
-html[dir="rtl"] .shell-sidebar {
-  border-right-width: 0;
-  border-left-width: 1px;
-}
-
-html[dir="rtl"] .drawer-panel {
-  border-left-width: 0;
-  border-right-width: 1px;
-}
-
-html[dir="rtl"] .drawer-root {
-  justify-content: flex-start;
-}
-
-/* Token bridge for legacy Tailwind-heavy pages. Keep it conservative and deterministic. */
-.bg-slate-50 { background-color: var(--crm-surface-50) !important; }
-.bg-slate-100 { background-color: var(--crm-surface-100) !important; }
-.bg-slate-200 { background-color: var(--crm-surface-200) !important; }
-.bg-white { background-color: var(--crm-panel) !important; }
-.bg-white\/90,
-.bg-white\/95 { background-color: rgba(255, 255, 255, 0.95) !important; }
-.bg-white\/5 { background-color: rgba(255, 255, 255, 0.08) !important; }
-.bg-slate-900,
-.bg-slate-950 { background-color: var(--crm-primary) !important; }
-.bg-slate-950\/40 { background-color: rgba(7, 44, 44, 0.76) !important; }
-.bg-sky-50 { background-color: rgba(7, 44, 44, 0.08) !important; }
-.bg-sky-600,
-.hover\:bg-sky-600:hover,
-.hover\:bg-sky-700:hover,
-.bg-sky-700 { background-color: var(--crm-primary) !important; }
+/* Token bridge for legacy Tailwind-heavy pages. The values follow the uploaded neumorphism skill tokens. */
+.bg-slate-50, .bg-slate-100, .bg-slate-200 { background-color: var(--crm-surface) !important; }
+.bg-white, .bg-white\/90, .bg-white\/95 { background-color: var(--crm-panel) !important; }
+.bg-white\/5 { background-color: rgba(255,255,255,0.42) !important; }
+.bg-slate-900, .bg-slate-950, .bg-slate-950\/40 { background-color: var(--crm-primary) !important; }
+.bg-sky-50 { background-color: rgba(0,102,102,0.08) !important; }
+.bg-sky-600, .hover\:bg-sky-600:hover, .hover\:bg-sky-700:hover, .bg-sky-700 { background-color: var(--crm-primary) !important; }
 .bg-emerald-50 { background-color: var(--crm-success-50) !important; }
-.bg-emerald-600,
-.hover\:bg-emerald-700:hover { background-color: var(--crm-success) !important; }
+.bg-emerald-600, .hover\:bg-emerald-700:hover { background-color: var(--crm-success) !important; }
 .bg-amber-50 { background-color: var(--crm-warning-50) !important; }
 .bg-rose-50 { background-color: var(--crm-danger-50) !important; }
-.bg-rose-600,
-.hover\:bg-rose-700:hover { background-color: var(--crm-danger) !important; }
+.bg-rose-600, .hover\:bg-rose-700:hover { background-color: var(--crm-danger) !important; }
 
-.text-sky-300 { color: #ffd0b8 !important; }
-.text-sky-600,
-.text-sky-700 { color: var(--crm-primary) !important; }
-.text-slate-900 { color: var(--crm-text) !important; }
-.text-slate-800 { color: #1f2937 !important; }
-.text-slate-700 { color: #374151 !important; }
-.text-slate-600 { color: var(--crm-muted) !important; }
-.text-slate-500 { color: var(--crm-muted-2) !important; }
-.text-slate-400 { color: #7c7467 !important; }
-.text-emerald-700,
-.text-emerald-900 { color: #0f7a37 !important; }
-.text-amber-700,
-.text-amber-900 { color: var(--crm-warning) !important; }
-.text-rose-700,
-.text-rose-900,
-.text-rose-400,
-.text-rose-300 { color: var(--crm-danger) !important; }
+.text-sky-300, .text-sky-600, .text-sky-700 { color: var(--crm-primary) !important; }
+.text-slate-900, .text-slate-800 { color: var(--crm-text) !important; }
+.text-slate-700, .text-slate-600 { color: var(--crm-muted) !important; }
+.text-slate-500, .text-slate-400 { color: var(--crm-muted-2) !important; }
+.text-emerald-700, .text-emerald-900 { color: var(--crm-success) !important; }
+.text-amber-700, .text-amber-900 { color: var(--crm-warning) !important; }
+.text-rose-700, .text-rose-900, .text-rose-400, .text-rose-300 { color: var(--crm-danger) !important; }
 .text-white { color: #ffffff !important; }
 
-.border-slate-100,
-.border-slate-200,
-.border-slate-300 { border-color: var(--crm-border) !important; }
-.border-slate-700,
-.border-slate-800 { border-color: rgba(255, 255, 255, 0.18) !important; }
-.border-sky-200,
-.border-sky-600 { border-color: rgba(7, 44, 44, 0.28) !important; }
-.border-emerald-200 { border-color: rgba(22, 163, 74, 0.32) !important; }
-.border-amber-100,
-.border-amber-200 { border-color: rgba(217, 119, 6, 0.32) !important; }
-.border-rose-200,
-.border-rose-900 { border-color: rgba(220, 38, 38, 0.34) !important; }
+.border-slate-100, .border-slate-200, .border-slate-300, .border-sky-200, .border-sky-600 { border-color: var(--crm-border) !important; }
+.border-slate-700, .border-slate-800 { border-color: rgba(255,255,255,0.32) !important; }
+.border-emerald-200 { border-color: rgba(0,166,61,0.32) !important; }
+.border-amber-100, .border-amber-200 { border-color: rgba(254,153,0,0.36) !important; }
+.border-rose-200, .border-rose-900 { border-color: rgba(255,33,87,0.34) !important; }
 
-.ring-sky-500,
-.focus\:ring-sky-500:focus,
-.focus-visible\:ring-sky-500:focus-visible { --tw-ring-color: var(--crm-focus) !important; }
-.shadow-sm { box-shadow: 0 1px 2px rgba(17, 24, 39, 0.06) !important; }
-.shadow-xl { box-shadow: var(--crm-shadow-popover) !important; }
-
-.rounded-\[32px\] { border-radius: var(--crm-radius-lg) !important; }
-.rounded-\[28px\] { border-radius: var(--crm-radius-lg) !important; }
-.rounded-\[24px\] { border-radius: var(--crm-radius-md) !important; }
-.rounded-2xl { border-radius: var(--crm-radius-md) !important; }
-.rounded-xl { border-radius: var(--crm-radius-sm) !important; }
+.ring-sky-500, .focus\:ring-sky-500:focus, .focus-visible\:ring-sky-500:focus-visible { --tw-ring-color: var(--crm-focus) !important; }
+.shadow-sm, .shadow-xl { box-shadow: var(--crm-shadow-panel) !important; }
+.rounded-\[32px\], .rounded-\[28px\] { border-radius: var(--crm-radius-lg) !important; }
+.rounded-\[24px\], .rounded-2xl, .rounded-xl { border-radius: var(--crm-radius-md) !important; }

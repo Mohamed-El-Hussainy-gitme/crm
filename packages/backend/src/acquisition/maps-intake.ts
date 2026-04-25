@@ -1,3 +1,5 @@
+import { coordinatesLabel, normalizeLocationInput } from "./location-normalizer.js";
+
 export type MapsIntakeResult = {
   source: string;
   mapUrl?: string | undefined;
@@ -5,6 +7,11 @@ export type MapsIntakeResult = {
   placeLabel?: string | undefined;
   locationText?: string | undefined;
   area?: string | undefined;
+  city?: string | undefined;
+  latitude?: number | undefined;
+  longitude?: number | undefined;
+  coordinates?: string | undefined;
+  plusCode?: string | undefined;
   company?: string | undefined;
   firstName?: string | undefined;
   phone?: string | undefined;
@@ -253,7 +260,7 @@ export async function parseMapsIntake(input: string, options: { defaultArea?: st
     undefined,
   );
 
-  const address = compactWhitespace(
+  const addressCandidate = compactWhitespace(
     jsonAddress ||
     (description && isAddressLike(description) ? description : undefined) ||
     extractAddressFromText(raw, title) ||
@@ -261,26 +268,38 @@ export async function parseMapsIntake(input: string, options: { defaultArea?: st
     undefined,
   );
 
+  const normalizedLocation = normalizeLocationInput({
+    rawText: combinedText,
+    explicitAddress: addressCandidate,
+    defaultArea: options.defaultArea,
+    mapUrl,
+  });
+  const address = normalizedLocation.address ?? undefined;
+  const area = normalizedLocation.area ?? undefined;
+  const city = normalizedLocation.city ?? undefined;
   const phone = extractPhone(raw) || extractPhone(remoteHtml || "");
-  const area = inferArea(address || raw, options.defaultArea);
   const confidenceScore = (title ? 35 : 0) + (phone ? 30 : 0) + (address ? 20 : 0) + (area ? 10 : 0) + (mapUrl ? 5 : 0);
 
   if (!title) warnings.push("Could not detect the cafe name. Paste the place title or copied Google Maps details with the link.");
   if (!phone) warnings.push("Phone was not detected. Google short links often do not expose phone numbers; paste copied place details if the number is visible in Maps.");
-  if (!address) warnings.push("Address was not detected reliably.");
-  if (!area) warnings.push("Area was not detected. Add it manually or paste a fuller address.");
+  warnings.push(...normalizedLocation.warnings);
 
   return {
     source,
-    mapUrl,
+    mapUrl: normalizedLocation.mapUrl ?? mapUrl,
     resolvedUrl,
     placeLabel: title,
     locationText: address,
     area,
+    city,
+    latitude: normalizedLocation.latitude ?? undefined,
+    longitude: normalizedLocation.longitude ?? undefined,
+    coordinates: coordinatesLabel(normalizedLocation.latitude, normalizedLocation.longitude) ?? undefined,
+    plusCode: normalizedLocation.plusCode ?? undefined,
     company: title,
     firstName: title,
     phone,
     confidence: confidenceScore >= 75 ? "HIGH" : confidenceScore >= 45 ? "MEDIUM" : "LOW",
-    warnings,
+    warnings: Array.from(new Set(warnings)),
   };
 }

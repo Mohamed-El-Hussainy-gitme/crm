@@ -128,7 +128,12 @@ type ParsedLead = {
   phone: string | null;
   normalizedPhone: string | null;
   area: string | null;
+  city?: string | null;
   address: string | null;
+  latitude?: number | null;
+  longitude?: number | null;
+  coordinates?: string | null;
+  plusCode?: string | null;
   mapUrl: string | null;
   source: string;
   notes: string | null;
@@ -222,7 +227,12 @@ function editableLeadPayload(lead: ParsedLead) {
     name: lead.name,
     phone: lead.phone || undefined,
     area: lead.area || undefined,
+    city: lead.city || undefined,
     address: lead.address || undefined,
+    latitude: lead.latitude ?? undefined,
+    longitude: lead.longitude ?? undefined,
+    coordinates: lead.coordinates || undefined,
+    plusCode: lead.plusCode || undefined,
     mapUrl: lead.mapUrl || undefined,
     source: lead.source || "Google Maps",
     notes: lead.notes || undefined,
@@ -844,9 +854,11 @@ export default function ProspectingPage() {
                           <FieldShell label="Cafe name"><Input value={lead.name} onChange={(event) => updateLead(lead.id, { name: event.target.value })} /></FieldShell>
                           <FieldShell label="Phone"><Input value={lead.phone ?? ""} onChange={(event) => updateLead(lead.id, { phone: event.target.value || null })} placeholder="010..." /></FieldShell>
                           <FieldShell label="Area"><Input value={lead.area ?? ""} onChange={(event) => updateLead(lead.id, { area: event.target.value || null })} /></FieldShell>
+                          <FieldShell label="City"><Input value={lead.city ?? ""} onChange={(event) => updateLead(lead.id, { city: event.target.value || null })} placeholder="القاهرة / الجيزة" /></FieldShell>
                           <FieldShell label="Source"><Input value={lead.source} onChange={(event) => updateLead(lead.id, { source: event.target.value })} /></FieldShell>
-                          <div className="md:col-span-2"><FieldShell label="Address"><Input value={lead.address ?? ""} onChange={(event) => updateLead(lead.id, { address: event.target.value || null })} /></FieldShell></div>
-                          <div className="md:col-span-2"><FieldShell label="Maps URL"><Input value={lead.mapUrl ?? ""} onChange={(event) => updateLead(lead.id, { mapUrl: event.target.value || null })} /></FieldShell></div>
+                          <FieldShell label="Coordinates"><Input value={lead.coordinates ?? ""} onChange={(event) => updateLead(lead.id, { coordinates: event.target.value || null })} placeholder="30.000000, 31.000000" className="force-ltr" dir="ltr" /></FieldShell>
+                          <div className="md:col-span-2"><FieldShell label="Readable address"><Input value={lead.address ?? ""} onChange={(event) => updateLead(lead.id, { address: event.target.value || null })} placeholder="شارع المساحة، الدقي، الجيزة" /></FieldShell></div>
+                          <div className="md:col-span-2"><FieldShell label="Maps URL"><Input value={lead.mapUrl ?? ""} onChange={(event) => updateLead(lead.id, { mapUrl: event.target.value || null })} className="force-ltr" dir="ltr" /></FieldShell></div>
                         </div>
                         {duplicateCount ? (
                           <div className="mt-4 rounded-lg border border-enterprise-warning/30 bg-white p-3">
@@ -921,9 +933,11 @@ export default function ProspectingPage() {
                           <FieldShell label="Name"><Input value={lead.name} onChange={(event) => updateLead(lead.id, { name: event.target.value })} /></FieldShell>
                           <FieldShell label="Phone"><Input value={lead.phone ?? ""} onChange={(event) => updateLead(lead.id, { phone: event.target.value || null })} placeholder="010..." /></FieldShell>
                           <FieldShell label="Area"><Input value={lead.area ?? ""} onChange={(event) => updateLead(lead.id, { area: event.target.value || null })} /></FieldShell>
+                          <FieldShell label="City"><Input value={lead.city ?? ""} onChange={(event) => updateLead(lead.id, { city: event.target.value || null })} placeholder="القاهرة / الجيزة" /></FieldShell>
                           <FieldShell label="Source"><Input value={lead.source} onChange={(event) => updateLead(lead.id, { source: event.target.value })} /></FieldShell>
-                          <div className="md:col-span-2"><FieldShell label="Address"><Input value={lead.address ?? ""} onChange={(event) => updateLead(lead.id, { address: event.target.value || null })} /></FieldShell></div>
-                          <div className="md:col-span-2"><FieldShell label="Maps URL"><Input value={lead.mapUrl ?? ""} onChange={(event) => updateLead(lead.id, { mapUrl: event.target.value || null })} /></FieldShell></div>
+                          <FieldShell label="Coordinates"><Input value={lead.coordinates ?? ""} onChange={(event) => updateLead(lead.id, { coordinates: event.target.value || null })} placeholder="30.000000, 31.000000" className="force-ltr" dir="ltr" /></FieldShell>
+                          <div className="md:col-span-2"><FieldShell label="Readable address"><Input value={lead.address ?? ""} onChange={(event) => updateLead(lead.id, { address: event.target.value || null })} placeholder="شارع المساحة، الدقي، الجيزة" /></FieldShell></div>
+                          <div className="md:col-span-2"><FieldShell label="Maps URL"><Input value={lead.mapUrl ?? ""} onChange={(event) => updateLead(lead.id, { mapUrl: event.target.value || null })} className="force-ltr" dir="ltr" /></FieldShell></div>
                         </div>
                         {lead.warnings.length ? <p className="mt-3 text-xs font-semibold text-enterprise-warning">{lead.warnings.join(" · ")}</p> : null}
                       </div>
