@@ -27,9 +27,9 @@ export default {
         },
       },
       fontFamily: {
-        sans: ["Space Mono", "ui-monospace", "SFMono-Regular", "Consolas", "monospace"],
-        display: ["Space Mono", "ui-monospace", "SFMono-Regular", "Consolas", "monospace"],
-        mono: ["JetBrains Mono", "Space Mono", "ui-monospace", "SFMono-Regular", "Consolas", "monospace"],
+        sans: ["Segoe UI", "Tahoma", "Arial", "ui-sans-serif", "system-ui", "sans-serif"],
+        display: ["Segoe UI", "Tahoma", "Arial", "ui-sans-serif", "system-ui", "sans-serif"],
+        mono: ["JetBrains Mono", "ui-monospace", "SFMono-Regular", "Consolas", "monospace"],
       },
       boxShadow: {
         enterprise: "10px 10px 24px rgba(174,171,170,0.72), -10px -10px 24px rgba(255,255,255,0.92)",

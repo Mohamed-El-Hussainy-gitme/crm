@@ -126,6 +126,7 @@ type ParsedLead = {
   id: string;
   name: string;
   phone: string | null;
+  phoneCandidates?: string[];
   normalizedPhone: string | null;
   area: string | null;
   city?: string | null;
@@ -258,10 +259,11 @@ function buildGoogleMapsBookmarklet(origin: string) {
     "const nodes='h1,[aria-label],[data-item-id],button,a,div';",
     "const text=clean(Array.from(document.querySelectorAll(nodes)).map(e=>e.getAttribute('aria-label')||e.textContent||'').filter(Boolean).join('\\n')).slice(0,7000);",
     "const h1=clean(document.querySelector('h1')?.textContent||'');",
-    "const phone=(text.match(/(?:\\+?20|0020|0)?1[0125][\\s\\d().-]{8,16}/)||[''])[0];",
+    "const phoneMatches=Array.from(new Set((text.match(/(?:\\+?20|0020|0)?1[0125][\\s\\d().-]{8,16}|(?:\\+?20|0020)?\\s*0?2[\\s\\d().-]{8}/g)||[]).map(clean).filter(Boolean)));",
+    "const phone=phoneMatches[0]||'';",
     "const address=clean(Array.from(document.querySelectorAll('[data-item-id*=address],button[aria-label^=\\\"Address:\\\"],button[aria-label^=\\\"العنوان\\\"]')).map(e=>(e.getAttribute('aria-label')||e.textContent||'').replace(/^Address:\\s*/i,'').replace(/^العنوان:?\\s*/, '')).find(Boolean)||'');",
     "const website=Array.from(document.querySelectorAll('a[href^=\\\"http\\\"]')).map(a=>a.href).find(h=>!/(google|gstatic|ggpht|schema)/i.test(h))||'';",
-    "const payload={name:h1,title:document.title,phone,address,website,pageUrl:location.href,rawText:text,capturedAt:new Date().toISOString(),source:'Google Maps Capture'};",
+    "const payload={name:h1,title:document.title,phone,phoneCandidates:phoneMatches,address,website,pageUrl:location.href,rawText:text,capturedAt:new Date().toISOString(),source:'Google Maps Capture'};",
     "const json=JSON.stringify(payload);",
     "const data=btoa(unescape(encodeURIComponent(json))).replace(/\\+/g,'-').replace(/\\//g,'_').replace(/=+$/,'');",
     "window.open(origin+'/prospecting?capture='+encodeURIComponent(data),'_blank','noopener,noreferrer');",
@@ -852,7 +854,16 @@ export default function ProspectingPage() {
                         </div>
                         <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
                           <FieldShell label="اسم المقهى"><Input value={lead.name} onChange={(event) => updateLead(lead.id, { name: event.target.value })} /></FieldShell>
-                          <FieldShell label="الهاتف"><Input value={lead.phone ?? ""} onChange={(event) => updateLead(lead.id, { phone: event.target.value || null })} placeholder="010..." /></FieldShell>
+                          <FieldShell label="الهاتف">
+                            <Input value={lead.phone ?? ""} onChange={(event) => updateLead(lead.id, { phone: event.target.value || null })} placeholder="010..." className="force-ltr" dir="ltr" />
+                            {lead.phoneCandidates?.filter((phone) => phone !== lead.phone).length ? (
+                              <div className="mt-2 flex flex-wrap gap-1">
+                                {lead.phoneCandidates.filter((phone) => phone !== lead.phone).slice(0, 4).map((phone) => (
+                                  <button key={phone} type="button" onClick={() => updateLead(lead.id, { phone })} className="force-ltr rounded-full bg-enterprise-surface px-2 py-1 text-[0.68rem] font-bold text-enterprise-primary shadow-insetSoft">{phone}</button>
+                                ))}
+                              </div>
+                            ) : null}
+                          </FieldShell>
                           <FieldShell label="المنطقة"><Input value={lead.area ?? ""} onChange={(event) => updateLead(lead.id, { area: event.target.value || null })} /></FieldShell>
                           <FieldShell label="المدينة"><Input value={lead.city ?? ""} onChange={(event) => updateLead(lead.id, { city: event.target.value || null })} placeholder="القاهرة / الجيزة" /></FieldShell>
                           <FieldShell label="المصدر"><Input value={lead.source} onChange={(event) => updateLead(lead.id, { source: event.target.value })} /></FieldShell>
@@ -931,7 +942,16 @@ export default function ProspectingPage() {
                         </div>
                         <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
                           <FieldShell label="الاسم"><Input value={lead.name} onChange={(event) => updateLead(lead.id, { name: event.target.value })} /></FieldShell>
-                          <FieldShell label="الهاتف"><Input value={lead.phone ?? ""} onChange={(event) => updateLead(lead.id, { phone: event.target.value || null })} placeholder="010..." /></FieldShell>
+                          <FieldShell label="الهاتف">
+                            <Input value={lead.phone ?? ""} onChange={(event) => updateLead(lead.id, { phone: event.target.value || null })} placeholder="010..." className="force-ltr" dir="ltr" />
+                            {lead.phoneCandidates?.filter((phone) => phone !== lead.phone).length ? (
+                              <div className="mt-2 flex flex-wrap gap-1">
+                                {lead.phoneCandidates.filter((phone) => phone !== lead.phone).slice(0, 4).map((phone) => (
+                                  <button key={phone} type="button" onClick={() => updateLead(lead.id, { phone })} className="force-ltr rounded-full bg-enterprise-surface px-2 py-1 text-[0.68rem] font-bold text-enterprise-primary shadow-insetSoft">{phone}</button>
+                                ))}
+                              </div>
+                            ) : null}
+                          </FieldShell>
                           <FieldShell label="المنطقة"><Input value={lead.area ?? ""} onChange={(event) => updateLead(lead.id, { area: event.target.value || null })} /></FieldShell>
                           <FieldShell label="المدينة"><Input value={lead.city ?? ""} onChange={(event) => updateLead(lead.id, { city: event.target.value || null })} placeholder="القاهرة / الجيزة" /></FieldShell>
                           <FieldShell label="المصدر"><Input value={lead.source} onChange={(event) => updateLead(lead.id, { source: event.target.value })} /></FieldShell>

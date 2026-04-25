@@ -47,6 +47,7 @@ type ParsedLocationResponse = {
   company?: string;
   firstName?: string;
   phone?: string;
+  phoneCandidates?: string[];
   confidence?: "HIGH" | "MEDIUM" | "LOW";
   warnings?: string[];
 };
@@ -212,7 +213,7 @@ export function ContactEditorDrawer({ open, mode, contact, onClose, onSaved }: C
       setAutofillResult(parsed);
       setForm((current) => {
         const detectedName = parsed.firstName || parsed.company || parsed.placeLabel || "";
-        const detectedPhone = parsed.phone || "";
+        const detectedPhone = parsed.phone || parsed.phoneCandidates?.[0] || "";
         const nextPhone = current.phone || detectedPhone || (detectedName ? stableMissingPhone(`${detectedName}|${parsed.mapUrl || parsed.resolvedUrl || form.locationSeed}`) : current.phone);
         return {
           ...current,
@@ -315,9 +316,12 @@ export function ContactEditorDrawer({ open, mode, contact, onClose, onSaved }: C
                 <span className="rounded-md border border-enterprise-border bg-enterprise-surface px-2.5 py-1 text-xs font-bold text-enterprise-text">{autofillResult.confidence || "LOW"}</span>
               </div>
               <div className="mt-3 grid gap-2 text-xs text-enterprise-muted sm:grid-cols-2">
-                <span>Phone: <b className="text-enterprise-text">{autofillResult.phone || "not detected"}</b></span>
+                <span>Phone: <b className="force-ltr inline-block text-enterprise-text">{autofillResult.phone || "not detected"}</b></span>
                 <span>Area: <b className="text-enterprise-text">{autofillResult.area || "not detected"}</b></span>
                 <span>City: <b className="text-enterprise-text">{autofillResult.city || "not detected"}</b></span>
+                {autofillResult.phoneCandidates?.length ? (
+                  <span className="md:col-span-2">أرقام أخرى: <b className="force-ltr inline-block text-enterprise-text">{autofillResult.phoneCandidates.join(" · ")}</b></span>
+                ) : null}
                 <span>Coordinates: <b className="text-enterprise-text force-ltr" dir="ltr">{autofillResult.coordinates || "not detected"}</b></span>
                 <span className="sm:col-span-2">Readable address: <b className="text-enterprise-text">{autofillResult.locationText || "not detected"}</b></span>
                 {autofillResult.plusCode ? <span className="sm:col-span-2">Plus code: <b className="text-enterprise-text force-ltr" dir="ltr">{autofillResult.plusCode}</b></span> : null}

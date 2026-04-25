@@ -1,6 +1,7 @@
 import type { ContactRow } from "../core/types.js";
 import { normalizePhone, splitTags } from "../core/utils.js";
 import { coordinatesLabel, normalizeLocationInput } from "./location-normalizer.js";
+import { extractPhones, extractPrimaryPhone, mergePhoneCandidates } from "./phone-extractor.js";
 
 type CaptureConfidence = "HIGH" | "MEDIUM" | "LOW";
 
@@ -19,6 +20,7 @@ export type CaptureLead = {
   id: string;
   name: string;
   phone: string | null;
+  phoneCandidates: string[];
   normalizedPhone: string | null;
   area: string | null;
   city: string | null;
@@ -95,13 +97,7 @@ function stringField(input: Record<string, unknown>, names: string[]): string | 
 }
 
 function extractPhone(text: string): string | null {
-  const compact = text.replace(/[()\-.]/g, " ");
-  const candidates = compact.match(/(?:\+?20|0020|0)?1[0125][\s\d]{8,14}|\+?\d[\d\s]{7,18}/g) ?? [];
-  for (const candidate of candidates) {
-    const digits = candidate.replace(/\D/g, "");
-    if (digits.length >= REAL_PHONE_MIN_DIGITS && digits.length <= 15) return candidate.trim();
-  }
-  return null;
+  return extractPrimaryPhone(text);
 }
 
 function isRealPhone(value?: string | null): boolean {
@@ -229,7 +225,17 @@ export function parseCapturedPlace(payload: unknown, options: { defaultArea?: st
   ) ?? "";
   const pageUrl = stringField(input, ["pageUrl", "url", "mapUrl", "mapsUrl"]);
   const initialMapUrl = pageUrl || extractUrl(rawText);
-  const phone = compactWhitespace(stringField(input, ["phone", "telephone", "tel"]) || extractPhone(rawText));
+  const explicitPhone = stringField(input, ["phone", "telephone", "tel"]);
+  const structuredCandidates = Array.isArray(input.phoneCandidates)
+    ? input.phoneCandidates.filter((item): item is string => typeof item === "string")
+    : [];
+  const phoneCandidates = mergePhoneCandidates(
+    explicitPhone ? [explicitPhone] : [],
+    structuredCandidates,
+    extractPhones(rawText).map((item) => item.value),
+    extractPhones(pageUrl || "").map((item) => item.value),
+  );
+  const phone = compactWhitespace(phoneCandidates[0] || explicitPhone || extractPhone(rawText));
   const explicitAddress = stringField(input, ["address", "locationText", "formattedAddress"]);
   const name = extractName(rawText, input, initialMapUrl);
   const normalizedLocation = normalizeLocationInput({
@@ -269,6 +275,7 @@ export function parseCapturedPlace(payload: unknown, options: { defaultArea?: st
     id: `capture_${hashText(`${displayName}|${phone ?? ""}|${mapUrl ?? ""}|${address ?? ""}`)}`,
     name: displayName,
     phone,
+    phoneCandidates,
     normalizedPhone: normalizePhone(phone),
     area,
     city,
@@ -313,8 +320,9 @@ function nameSimilarity(left: string, right: string): number {
   return Math.round((intersection / Math.max(a.size, b.size)) * 100);
 }
 
-export function duplicateCandidatesForLead(lead: CaptureLead | { name: string; phone?: string | null; normalizedPhone?: string | null; area?: string | null; mapUrl?: string | null }, contacts: ContactRow[]): DuplicateCandidate[] {
-  const normalized = normalizePhone(lead.normalizedPhone || lead.phone);
+export function duplicateCandidatesForLead(lead: CaptureLead | { name: string; phone?: string | null; phoneCandidates?: string[]; normalizedPhone?: string | null; area?: string | null; mapUrl?: string | null }, contacts: ContactRow[]): DuplicateCandidate[] {
+  const leadPhones = mergePhoneCandidates(lead.phoneCandidates, [lead.normalizedPhone, lead.phone]);
+  const normalized = leadPhones[0] ? normalizePhone(leadPhones[0]) : normalizePhone(lead.normalizedPhone || lead.phone);
   const leadArea = (lead.area ?? "").trim().toLowerCase();
   const mapUrl = (lead.mapUrl ?? "").trim();
   const candidates: DuplicateCandidate[] = [];
@@ -325,7 +333,7 @@ export function duplicateCandidatesForLead(lead: CaptureLead | { name: string; p
     const contactPhone = normalizePhone(contact.normalizedPhone || contact.phone);
     const contactArea = (contact.area ?? "").trim().toLowerCase();
 
-    if (normalized && contactPhone && normalized === contactPhone) {
+    if (contactPhone && leadPhones.some((phone) => normalizePhone(phone) === contactPhone)) {
       score += 100;
       reasons.push("same phone");
     }

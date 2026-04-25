@@ -1,4 +1,5 @@
 import { coordinatesLabel, normalizeLocationInput } from "./location-normalizer.js";
+import { extractPhones, extractPrimaryPhone, mergePhoneCandidates } from "./phone-extractor.js";
 
 export type MapsIntakeResult = {
   source: string;
@@ -15,6 +16,7 @@ export type MapsIntakeResult = {
   company?: string | undefined;
   firstName?: string | undefined;
   phone?: string | undefined;
+  phoneCandidates?: string[] | undefined;
   confidence: "HIGH" | "MEDIUM" | "LOW";
   warnings: string[];
 };
@@ -137,20 +139,7 @@ function extractJsonString(html: string, key: string): string | undefined {
 }
 
 function extractPhone(input: string): string | undefined {
-  const text = input.replace(/[()\-.]/g, " ");
-  const patterns = [
-    /(?:\+?20|0020)?\s*0?1[0125](?:[\s\u00a0]*\d){8}\b/g,
-    /(?:\+?20|0020)?\s*0?2(?:[\s\u00a0]*\d){7,8}\b/g,
-    /(?:\+?20|0020)?\s*0?[34](?:[\s\u00a0]*\d){7,8}\b/g,
-  ];
-  for (const pattern of patterns) {
-    const matches = text.match(pattern) ?? [];
-    for (const candidate of matches) {
-      const digits = candidate.replace(/\D/g, "");
-      if (digits.length >= 9 && digits.length <= 14) return compactWhitespace(candidate);
-    }
-  }
-  return undefined;
+  return extractPrimaryPhone(input) ?? undefined;
 }
 
 function isAddressLike(value?: string): boolean {
@@ -277,7 +266,12 @@ export async function parseMapsIntake(input: string, options: { defaultArea?: st
   const address = normalizedLocation.address ?? undefined;
   const area = normalizedLocation.area ?? undefined;
   const city = normalizedLocation.city ?? undefined;
-  const phone = extractPhone(raw) || extractPhone(remoteHtml || "");
+  const phoneCandidates = mergePhoneCandidates(
+    extractPhones(raw).map((item) => item.value),
+    extractPhones(remoteHtml || "").map((item) => item.value),
+    extractPhones(resolvedUrl || "").map((item) => item.value),
+  );
+  const phone = phoneCandidates[0];
   const confidenceScore = (title ? 35 : 0) + (phone ? 30 : 0) + (address ? 20 : 0) + (area ? 10 : 0) + (mapUrl ? 5 : 0);
 
   if (!title) warnings.push("Could not detect the cafe name. Paste the place title or copied Google Maps details with the link.");
@@ -299,6 +293,7 @@ export async function parseMapsIntake(input: string, options: { defaultArea?: st
     company: title,
     firstName: title,
     phone,
+    phoneCandidates,
     confidence: confidenceScore >= 75 ? "HIGH" : confidenceScore >= 45 ? "MEDIUM" : "LOW",
     warnings: Array.from(new Set(warnings)),
   };

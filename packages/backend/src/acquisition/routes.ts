@@ -7,6 +7,7 @@ import { jsonResponse } from "../common/http.js";
 import { parseMapsIntake } from "./maps-intake.js";
 import { coordinatesLabel, normalizeLocationInput } from "./location-normalizer.js";
 import { duplicateCandidatesForLead, parseCapturedPlace } from "./capture-assistant.js";
+import { extractPhones, extractPrimaryPhone, mergePhoneCandidates } from "./phone-extractor.js";
 import { readJsonBody } from "../common/validation.js";
 import { createActivity } from "../core/business.js";
 import { CoreRepository } from "../core/repository.js";
@@ -19,6 +20,7 @@ type ParsedCafeLead = {
   id: string;
   name: string;
   phone: string | null;
+  phoneCandidates?: string[];
   normalizedPhone: string | null;
   area: string | null;
   city?: string | null;
@@ -76,13 +78,7 @@ function extractUrl(text: string): string | null {
 }
 
 function extractPhone(text: string): string | null {
-  const compact = text.replace(/[()\-.]/g, " ");
-  const candidates = compact.match(/(?:\+?20|0020|0)?1[0125][\s\d]{8,14}|\+?\d[\d\s]{7,18}/g) ?? [];
-  for (const candidate of candidates) {
-    const digits = candidate.replace(/\D/g, "");
-    if (digits.length >= REAL_PHONE_MIN_DIGITS && digits.length <= 15) return candidate.trim();
-  }
-  return null;
+  return extractPrimaryPhone(text);
 }
 
 function decodeMapsNameFromUrl(urlValue: string | null): string | null {
@@ -162,7 +158,8 @@ function parseLeadChunk(chunk: string, defaultArea?: string, defaultSource = "Go
   if (!rawLines.length) return null;
 
   const mapUrl = extractUrl(chunk);
-  const phone = extractPhone(chunk);
+  const phoneCandidates = extractPhones(chunk).map((item) => item.value);
+  const phone = phoneCandidates[0] ?? extractPhone(chunk);
   const nameFromUrl = decodeMapsNameFromUrl(mapUrl);
   const nameLine = rawLines.find((line) => !looksLikeMetadata(line) && !extractPhone(line) && !line.startsWith("http"));
   const name = normalizeLine(nameFromUrl || nameLine || "");
@@ -181,6 +178,7 @@ function parseLeadChunk(chunk: string, defaultArea?: string, defaultSource = "Go
     id: `lead_${hashText(`${name}|${phone ?? ""}|${normalizedLocation.mapUrl ?? mapUrl ?? ""}|${address ?? ""}`)}`,
     name,
     phone,
+    phoneCandidates,
     normalizedPhone: normalizePhone(phone),
     area,
     city: normalizedLocation.city,
@@ -206,7 +204,8 @@ async function parseLeadChunkDeep(chunk: string, defaultArea?: string, defaultSo
   const name = resolved?.placeLabel || resolved?.company || local?.name || "";
   if (!name || name.length < 2) return local;
 
-  const phone = resolved?.phone || local?.phone || null;
+  const phoneCandidates = mergePhoneCandidates(resolved?.phoneCandidates, local?.phoneCandidates);
+  const phone = phoneCandidates[0] || resolved?.phone || local?.phone || null;
   const area = resolved?.area || local?.area || defaultArea || null;
   const address = resolved?.locationText || local?.address || null;
   const mapUrl = resolved?.mapUrl || local?.mapUrl || null;
@@ -223,6 +222,7 @@ async function parseLeadChunkDeep(chunk: string, defaultArea?: string, defaultSo
     id: `lead_${hashText(`${name}|${phone ?? ""}|${mapUrl ?? ""}|${address ?? ""}`)}`,
     name,
     phone,
+    phoneCandidates,
     normalizedPhone: normalizePhone(phone),
     area,
     city,
