@@ -206,7 +206,7 @@ async function fetchGoogleMapsPage(urlValue: string): Promise<{ finalUrl?: strin
   }
 }
 
-export async function parseMapsIntake(input: string, options: { defaultArea?: string; defaultSource?: string; resolveRemote?: boolean } = {}): Promise<MapsIntakeResult> {
+export async function parseMapsIntake(input: string, options: { defaultArea?: string | undefined; defaultSource?: string | undefined; resolveRemote?: boolean | undefined } = {}): Promise<MapsIntakeResult> {
   const raw = input.trim();
   const warnings: string[] = [];
   const rawUrl = extractUrl(raw);
